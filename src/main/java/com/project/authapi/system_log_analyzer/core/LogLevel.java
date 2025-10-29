@@ -1,10 +1,10 @@
 package com.project.authapi.system_log_analyzer.core;
 
 public enum LogLevel {
-    info,
-    warn,
+    debug, // 0 - SYSTEM Custom errors (also in printed in console before death)
+    fatal, // 1 - Application controlled deaths
     error,
-    fatal,
-    debug,
+    warn,
+    info,
     trace
 }

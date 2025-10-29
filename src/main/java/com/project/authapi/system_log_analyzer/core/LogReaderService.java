@@ -1,5 +1,6 @@
 package com.project.authapi.system_log_analyzer.core;
 
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -9,6 +10,7 @@ import java.util.*;
 import java.util.function.Predicate;
 
 @Service
+@NoArgsConstructor
 public class LogReaderService {
     private static final File logsDir = new File("C:/BackBoard/logs");
     private static final File logFile = new File(logsDir, "WholeLog.log");
