@@ -48,15 +48,15 @@ public class LogEntry {
     }
 
     @Override
-    public String toString() {    // |29/10/2025 20:06:20| LOG LogLevel (CustomLevel) - Some message  |
-        return "|"+ logTime + "| LOG " +
-                logLevel.toString() +
+    public String toString() {    // 29-10-2025 20:06:20 [LogLevel] (CustomLevel) - Some message  |
+        return  logTime + " [" +
+                logLevel.toString() + "]" +
                 " (" + (customLevel != null ? customLevel : "null") + ")" +
                 " - " + logMessage + " |" + System.lineSeparator();
     }
 
     private String getDate() {
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         return "[" + java.time.LocalDateTime.now().format(dtf) + "] ";
     }
 

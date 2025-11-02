@@ -31,12 +31,9 @@ public class FileLoggerService implements LoggerService {
     // Set level of save
     private LogLevel currentThreshold = LogLevel.info;
 
-    private LogReaderService logReaderService;
-
     @Autowired
     public FileLoggerService(LogReaderService logReaderService) {
         try {
-            this.logReaderService = logReaderService;
             createLogFileIfMissing();
 
         } catch (Exception ex){
@@ -153,6 +150,7 @@ public class FileLoggerService implements LoggerService {
     private void flushLogToMainFile() {
         String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
         File wholeFile = new File(logsDir, "WholeLog_" + date +".log");   // Create whole log file with unique name
+        LogReaderService logReaderService = new LogReaderService();
         try (FileWriter fw = new FileWriter(wholeFile, true)){          // Create file
 
             for (String log : logReaderService.readAllLogs()) {          // Fetch for all logs in pure String format

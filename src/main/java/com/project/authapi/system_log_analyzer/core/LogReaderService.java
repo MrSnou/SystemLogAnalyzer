@@ -1,6 +1,5 @@
 package com.project.authapi.system_log_analyzer.core;
 
-import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -10,14 +9,20 @@ import java.util.*;
 import java.util.function.Predicate;
 
 @Service
-@NoArgsConstructor
 public class LogReaderService {
     private static final File logsDir = new File("C:/BackBoard/logs");
-    private static final File logFile = new File(logsDir, "WholeLog.log");
+
+    public LogReaderService() {
+        if  (logsDir.exists()) {
+            logsDir.mkdirs();
+            IO.println("LogReaderService created logs directory at:" +  logsDir.getAbsolutePath());
+        }
+    }
 
     public List<String> readAllLogs() {
         List<String> logs = new ArrayList<>();
         for (File logFile : getLogFiles()) {
+            if (logFile.isFile() && logFile.length() == 0) continue;
             try {
                 logs.addAll(Files.readAllLines(logFile.toPath(), StandardCharsets.UTF_8));
             } catch (IOException e) {
@@ -28,7 +33,7 @@ public class LogReaderService {
     }
 
     public List<String> readByLevel(LogLevel level) {
-        return readLogsMatching(line -> line.contains(" " + level.toString() + " "));
+        return readLogsMatching(line -> line.contains("[" + level.toString() + "]"));
     }
 
     public List<String> readByKeyword(String keyword) {
