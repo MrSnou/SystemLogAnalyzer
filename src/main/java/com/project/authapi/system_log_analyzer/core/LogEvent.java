@@ -25,6 +25,7 @@ public record LogEvent(LocalDateTime timestamp,
 
         if (message == null || message.isBlank())
             throw new IllegalArgumentException("Message cannot be blank.");
+
     }
 
     @Override

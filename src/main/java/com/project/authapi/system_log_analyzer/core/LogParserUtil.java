@@ -3,6 +3,8 @@ package com.project.authapi.system_log_analyzer.core;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +14,8 @@ import java.util.regex.Pattern;
 @Component
 public class LogParserUtil {
     private LogReaderService logReaderService;
+    private static final DateTimeFormatter LOG_TIME_FMT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public LogParserUtil(LogReaderService logReaderService) {
         this.logReaderService = logReaderService;
@@ -31,6 +35,7 @@ public class LogParserUtil {
                         "APP", "LogParserUtil - Failed to parseAllLogs()",
                         null, null
                 );
+                parsedEntries.add(log);
                 IO.println("(LogParser) Failed to parse line: " + line);
             }
         }
@@ -49,6 +54,15 @@ public class LogParserUtil {
         String custom = m.group("custom");
         String message = m.group("msg");
 
+        LocalDateTime timestamp;
+        boolean parseError = false;
+        try {
+            timestamp = LocalDateTime.parse(time, LOG_TIME_FMT);
+        } catch (DateTimeParseException e) {
+            timestamp = LocalDateTime.now();
+            parseError = true;
+        }
+
         LogLevel level;
         try {
             level = LogLevel.valueOf(levelStr.toLowerCase());
@@ -56,13 +70,14 @@ public class LogParserUtil {
             level = LogLevel.info;
         }
 
-        LogEvent entry = new LogEvent(LocalDateTime.now(), level, "null", message, custom.equals("null") ? null : custom, line
-                );
 
-//        entry.setLogTime("[" + time + "] ");
-//        entry.setLogLevel(level);
-//        entry.setCustomLevel(custom.equals("null") ? null : custom);
-//        entry.setLogMessage(message);
+        String customLevel = custom.equals("null") ? null : custom;
+        if (parseError) customLevel = "PARSER_ERROR";
+        LogEvent entry = new LogEvent(
+                timestamp, level,
+                "null", message,
+                custom.equals("null") ? null : custom, line
+                );
 
         return Optional.of(entry);
     }
