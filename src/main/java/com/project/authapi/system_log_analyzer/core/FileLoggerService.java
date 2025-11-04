@@ -31,13 +31,19 @@ public class FileLoggerService implements LoggerService {
     // Set level of save
     private LogLevel currentThreshold = LogLevel.info;
 
+
     @Autowired
     public FileLoggerService(LogReaderService logReaderService) {
         try {
             createLogFileIfMissing();
 
         } catch (Exception ex){
-            LogEntry logEntry = new LogEntry("SYSTEM", "(FileLoggerServiceNoArgsConstructor) - Exception in constructor");
+            LogEvent logEntry = new LogEvent(
+                    LocalDateTime.now(), LogLevel.debug,
+                    "APP", "Exception in FileLoggerService",
+                    null, null
+            );
+
             IO.println(logEntry.toString() + "\n" + ex.getMessage());
             ex.printStackTrace();
         }
@@ -46,49 +52,78 @@ public class FileLoggerService implements LoggerService {
 
     @Override
     public void log(String message) {
-        LogEntry logEntry = new LogEntry(message);
-        try (FileWriter fw = new FileWriter(logFile, true)) {
+        LogEvent logEntry = new LogEvent(
+                LocalDateTime.now(), LogLevel.debug,
+                "APP", message,
+                null, null
+        );
 
-            if (logEntry.getLogLevel().ordinal() < currentThreshold.ordinal()) return;      // Check if threshold is not higher
+            if (logEntry.level().ordinal() < currentThreshold.ordinal()) return;      // Check if threshold is not higher
 
             rotateLogsIfNeeded();
-            fw.write(logEntry.toString());
 
+            try (FileWriter fw = new FileWriter(logFile, true)) {
+                fw.write(logEntry.toString() + System.lineSeparator());
+                fw.flush();
 
-        } catch (IOException e) {
-            LogEntry IOExLogEntry = new LogEntry("SYSTEM", "(FileLoggerService.log(String)) - Exception when writing logEntry");
+            } catch (IOException e) {
+            LogEvent IOExLogEntry = new LogEvent(
+                    LocalDateTime.now(), LogLevel.debug,
+                    "APP", "(FileLoggerService.log(String)) - Exception when writing logEntry",
+                    null, null
+            );
             IO.println(IOExLogEntry.toString() + "\n" + e.getMessage());
             throw new RuntimeException(e);
         }
     }
     @Override
     public void log(LogLevel level, String message) {
-        LogEntry logEntry = new LogEntry(level, message);
+        LogEvent logEntry = new LogEvent(
+                LocalDateTime.now(), level,
+                "APP", message,
+                null, null
+        );
+
         try (FileWriter fw = new FileWriter(logFile, true)) {
 
             if (level.ordinal() < currentThreshold.ordinal()) return;  // Check if threshold is not higher
 
             rotateLogsIfNeeded();
-            fw.write(logEntry.toString());
+            fw.write(logEntry.toString() + System.lineSeparator());
 
 
         } catch (IOException e) {
-            LogEntry IOExLogEntry = new LogEntry("SYSTEM", "(FileLoggerService.log(LogLevel, String)) - Exception when writing logEntry");
+            LogEvent IOExLogEntry = new LogEvent(
+                    LocalDateTime.now(), LogLevel.debug,
+                    "APP", "FileLoggerService.log(LogLevel, String))- Exception when writing logEntry",
+                    null, null
+            );
+
             IO.println(IOExLogEntry.toString() + "\n" + e.getMessage());
             throw new RuntimeException(e);
         }
     }
     @Override
     public void error(LogLevel level, Throwable t) {
-        LogEntry logEntry = new LogEntry(level, t.getMessage());
+        LogEvent logEntry = new LogEvent(
+                LocalDateTime.now(), level,
+                null, t.getMessage(),
+                null, null
+        );
+
         try (FileWriter fw = new FileWriter(logFile, true)) {
 
             rotateLogsIfNeeded();
-            fw.write(logEntry.toString());
+            fw.write(logEntry.toString() + System.lineSeparator());
 
 
         } catch (IOException e) {
-            LogEntry IOExLogEntry = new LogEntry("SYSTEM", "(FileLoggerService.error(LogLevel, Throwable)) -Exception when writing logEntry");
+            LogEvent IOExLogEntry = new LogEvent(
+                    LocalDateTime.now(), LogLevel.debug,
+            "APP", "FileLoggerService.error(LogLevel, Throwable) - Exception when writing logEntry",
+            null, null
+            );
+
             IO.println(IOExLogEntry.toString() + "\n" + e.getMessage());
             throw new RuntimeException(e);
         }
@@ -96,15 +131,24 @@ public class FileLoggerService implements LoggerService {
     }
     @Override
     public void severe(String customLevel, String message) {
-        LogEntry logEntry = new LogEntry(customLevel, message);
+        LogEvent logEntry = new LogEvent(
+                LocalDateTime.now(), LogLevel.info,
+                "APP", message,
+                customLevel, null
+        );
+
         try (FileWriter fw = new FileWriter(logFile, true)) {
 
             rotateLogsIfNeeded();
-            fw.write(logEntry.toString());
+            fw.write(logEntry.toString() + System.lineSeparator());
 
 
         } catch (IOException e) {
-            LogEntry IOExLogEntry = new LogEntry("SYSTEM", "(FileLoggerService.severe(String, String)) - Exception when writing logEntry");
+            LogEvent IOExLogEntry = new LogEvent(
+                    LocalDateTime.now(), LogLevel.debug,
+                    "APP", "FileLoggerService.severe(String, String) - Exception when writing logEntry",
+                    null, null
+            );
             IO.println(IOExLogEntry.toString() + "\n" + e.getMessage());
             throw new RuntimeException(e);
         }
@@ -124,10 +168,15 @@ public class FileLoggerService implements LoggerService {
                 logFile.createNewFile();
                 FileWriter fw = new FileWriter(logFile, true);
                 fw.write("=== New Log File Started " +
-                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")) + " ===\n");
+                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")) + " ===\n" + System.lineSeparator());
 
             } catch (IOException e) {
-                LogEntry logEntry = new LogEntry("SYSTEM", "(FileLoggerService.rotateLogsIfNeeded())Error creating log new file");
+                LogEvent logEntry = new LogEvent(
+                        LocalDateTime.now(), LogLevel.debug,
+                        "APP", "FileLoggerService.rotateLogsIfNeeded() - Error creating log new file",
+                        null, null
+                        );
+
                 IO.println(logEntry.toString() + "\n" + e.getMessage());
                 throw new RuntimeException(e);
             }
@@ -140,7 +189,11 @@ public class FileLoggerService implements LoggerService {
             try {
                 logFile.createNewFile();
             } catch (IOException e) {
-                LogEntry logEntry = new LogEntry("SYSTEM", "(FileLoggerService.createLogFileIfMissing()) - Exception in method createLogFileIfMissing");
+                LogEvent logEntry = new LogEvent(
+                        LocalDateTime.now(), LogLevel.debug,
+                        "APP", "FileLoggerService.createLogFileIfMissing - Error creating log new file",
+                        null, null
+                );
                 IO.println(logEntry.toString() + "\n" + e.getMessage());
                 e.printStackTrace();
             }
@@ -156,12 +209,18 @@ public class FileLoggerService implements LoggerService {
             for (String log : logReaderService.readAllLogs()) {          // Fetch for all logs in pure String format
                 fw.write(log);                                           // Save them in file
                 fw.write(System.lineSeparator());                        // Make sure to not merge lines
-                fw.write("=== SESSION ENDED AT "                     // Leave date at exit
-                        + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")) + " ===\n");
+
             }
+            fw.write("=== SESSION ENDED AT "                     // Leave date at exit
+                    + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")) + " ===\n");
             fw.flush();                                                  // Self-explanatory
         } catch (IOException e) {
-            LogEntry logEntry = new LogEntry("SYSTEM", "(FileLoggerService.flushLogToMainFile()) - Exception at finishing WholeLog File");
+            LogEvent logEntry = new LogEvent(
+                    LocalDateTime.now(), LogLevel.debug,
+                    "APP", "FileLoggerService.flushLogToMainFile() - Exception in method flushLogToMainFile",
+                    null , null
+            );
+
             IO.println(logEntry.toString() + "\n" + e.getMessage());
             e.printStackTrace();
         }
@@ -172,9 +231,13 @@ public class FileLoggerService implements LoggerService {
         if (allLogFiles == null || allLogFiles.length == 0) return;
 
         Arrays.sort(allLogFiles, Comparator.comparingLong(File::lastModified)); // Sort files from oldest to youngest
-        for (int i = 0; i < allLogFiles.length - MAX_FILES_PER_SESSION; i++) {  // Check is there 20 or less files, if not delete oldest one.
+        for (int i = 0; i < allLogFiles.length - MAX_FILES_PER_SESSION; i++) {  // Check is there 20 or fever files, if not delete oldest one.
             if (!allLogFiles[i].delete()) {                                     // Make sure that file is deleted
-                LogEntry logEntry = new LogEntry("SYSTEM", "(deleteOldLogFiles) - Failed to delete: " + allLogFiles[i].getName());
+                LogEvent logEntry = new LogEvent(
+                        LocalDateTime.now(), LogLevel.debug,
+                        "APP", "FileLoggerService.flushLogToMainFile() - Exception in method flushLogToMainFile",
+                        null , null
+                );
                 IO.println(logEntry.toString());
             }
         }

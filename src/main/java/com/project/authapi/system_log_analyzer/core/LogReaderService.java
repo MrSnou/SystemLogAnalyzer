@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -13,9 +14,14 @@ public class LogReaderService {
     private static final File logsDir = new File("C:/BackBoard/logs");
 
     public LogReaderService() {
-        if  (logsDir.exists()) {
+        if (!logsDir.exists())  {
             logsDir.mkdirs();
             IO.println("LogReaderService created logs directory at:" +  logsDir.getAbsolutePath());
+            LogEvent event = new LogEvent(
+                    LocalDateTime.now(), LogLevel.info,
+                    "APP", "Created logs directory",
+                    null, null
+                    );
         }
     }
 

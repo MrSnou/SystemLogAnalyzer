@@ -2,10 +2,7 @@ package com.project.authapi.system_log_analyzer.core;
 
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,23 +17,29 @@ public class LogParserUtil {
         this.logReaderService = logReaderService;
     }
 
-    public List<LogEntry> parseAllLogs() {
+    public List<LogEvent> parseAllLogs() {
         List<String> rawLogs = logReaderService.readAllLogs();
-        List<LogEntry> parsedEntries = new ArrayList<>();
+        List<LogEvent> parsedEntries = new ArrayList<>();
 
         for (String line : rawLogs) {
-            Optional<LogEntry> entry = parseLine(line);
+            Optional<LogEvent> entry = parseLine(line);
             if (entry.isPresent()) {
                 parsedEntries.add(entry.get());
             } else {
+                LogEvent log = new LogEvent(
+                        LocalDateTime.now(), LogLevel.debug,
+                        "APP", "LogParserUtil - Failed to parseAllLogs()",
+                        null, null
+                );
                 IO.println("(LogParser) Failed to parse line: " + line);
             }
         }
         return parsedEntries;
     }
 
-    private Optional<LogEntry> parseLine(String line) {
-        Pattern p = Pattern.compile("^\\[(?<time>[^]]+)\\]\\s*\\[(?<level>[^]]+)\\]\\s*\\((?<custom>[^)]*)\\)\\s*-\\s*(?<msg>.*)\\|$");
+    private Optional<LogEvent> parseLine(String line) {
+        Pattern p = Pattern.compile("^\\[(?<time>[^]]+)\\]\\s*\\[(?<level>[^]]+)\\]\\s*\\((?<custom>[^)]*)\\)\\s*-\\s*(?<msg>.*)$");
+
         Matcher m = p.matcher(line.trim());
 
         if (!m.matches()) return Optional.empty();
@@ -53,11 +56,13 @@ public class LogParserUtil {
             level = LogLevel.info;
         }
 
-        LogEntry entry = new LogEntry();
-        entry.setLogTime("[" + time + "] ");
-        entry.setLogLevel(level);
-        entry.setCustomLevel(custom.equals("null") ? null : custom);
-        entry.setLogMessage(message);
+        LogEvent entry = new LogEvent(LocalDateTime.now(), level, "null", message, custom.equals("null") ? null : custom, line
+                );
+
+//        entry.setLogTime("[" + time + "] ");
+//        entry.setLogLevel(level);
+//        entry.setCustomLevel(custom.equals("null") ? null : custom);
+//        entry.setLogMessage(message);
 
         return Optional.of(entry);
     }
