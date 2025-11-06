@@ -23,8 +23,8 @@ public record LogEvent(LocalDateTime timestamp,
         if (level == null)
             throw new IllegalArgumentException("LogLevel cannot be null.");
 
-        if (message == null || message.isBlank())
-            throw new IllegalArgumentException("Message cannot be blank.");
+        //if (message == null || message.isBlank())
+        //    throw new IllegalArgumentException("Message cannot be blank.");
 
     }
 

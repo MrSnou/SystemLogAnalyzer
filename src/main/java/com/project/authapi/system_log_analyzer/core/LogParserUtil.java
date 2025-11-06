@@ -26,6 +26,8 @@ public class LogParserUtil {
         List<LogEvent> parsedEntries = new ArrayList<>();
 
         for (String line : rawLogs) {
+            if (line.startsWith("===") || line.isBlank()) continue;
+
             Optional<LogEvent> entry = parseLine(line);
             if (entry.isPresent()) {
                 parsedEntries.add(entry.get());

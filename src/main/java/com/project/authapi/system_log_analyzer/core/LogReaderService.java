@@ -1,10 +1,12 @@
 package com.project.authapi.system_log_analyzer.core;
 
+import com.project.authapi.system_log_analyzer.io.WindowsEventExporter;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Predicate;
@@ -28,8 +30,12 @@ public class LogReaderService {
     public List<String> readAllLogs() {
         List<String> logs = new ArrayList<>();
         for (File logFile : getLogFiles()) {
+            if (!logFile.getName().startsWith("WholeLog")) continue;
             if (logFile.isFile() && logFile.length() == 0) continue;
+
             try {
+                Files.list(Paths.get("logs/exported"))
+                        .filter(path -> path.toString().endsWith(".csv"));
                 logs.addAll(Files.readAllLines(logFile.toPath(), StandardCharsets.UTF_8));
             } catch (IOException e) {
                 e.printStackTrace();

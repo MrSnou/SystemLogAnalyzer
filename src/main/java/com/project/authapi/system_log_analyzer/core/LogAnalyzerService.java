@@ -2,6 +2,7 @@ package com.project.authapi.system_log_analyzer.core;
 
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -16,11 +17,12 @@ public class LogAnalyzerService {
         this.logParserUtil = logParserUtil;
     }
 
-    public void analyzeAndReport() {
-        List<LogEvent> allEvents = logParserUtil.parseAllLogs();
+    public void analyzeAndReport(List<LogEvent> events) {
+        //List<LogEvent> allEvents = logParserUtil.parseAllLogs();
+        List<LogEvent> allEvents = events;
 
         if (allEvents.isEmpty()) {
-            IO.println("There are no logs to analyze");
+            IO.println("(LogAnalyzerService.analyzeAndReport()) - There are no logs to analyze");
             return;
         }
 
@@ -36,23 +38,29 @@ public class LogAnalyzerService {
                 .limit(10)
                 .toList();
 
-        printReport(countByLevel, countBySource, latest, allEvents);
+        String report = buildReport(countByLevel, countBySource, latest, allEvents);
+
+        IO.println(report); // print on console
+
+        FileReportExporter.export(report); // print in file
     }
 
-    private void printReport(Map<LogLevel, Long> byLevel, Map<String, Long> bySource,
-                             List<LogEvent> latest, List<LogEvent> allEvents) {
+    public String buildReport(Map<LogLevel, Long> byLevel, Map<String, Long> bySource,
+                               List<LogEvent> latest, List<LogEvent> allEvents) {
 
-        IO.println("\n===== 📊 SYSTEM LOG REPORT =====");
-        IO.println("By Level:");
-        byLevel.forEach((level, count) -> IO.println("  " + level + ": " + count));
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n===== 📊 SYSTEM LOG REPORT =====\n");
 
-        IO.println("\nBy Source:");
-        bySource.forEach((src, count) -> IO.println("  " + src + ": " + count));
+        sb.append("By Level:\n");
+        byLevel.forEach((level, count) -> sb.append("  ").append(level).append(": ").append(count).append("\n"));
 
-        IO.println("\nLatest Events:");
-        latest.forEach(e -> IO.println("  " + e));
+        sb.append("\nBy Source:\n");
+        bySource.forEach((src, count) -> sb.append("  ").append(src).append(": ").append(count).append("\n"));
 
-        IO.println("===============================");
+        sb.append("\nLatest Events:\n");
+        latest.forEach(e -> sb.append("  ").append(e).append("\n"));
+
+        sb.append("===============================\n");
 
         List<LogEvent> errorEvents = allEvents.stream()
                 .filter(LogEvent::isError)
@@ -65,12 +73,14 @@ public class LogAnalyzerService {
                 ? 0.0
                 : (double) errorEvents.size() / allEvents.size() * 100;
 
-        IO.println("\n===== ⚠️ ERROR SUMMARY =====");
-        IO.println("Total Errors: " + errorEvents.size());
-        IO.println("Error Rate: " + String.format("%.2f%%", errorRate));
-        IO.println("Top Error Source: " + topErrorSource);
-        IO.println("Most Frequent Error: " + topErrorMessage);
-        IO.println("===============================");
+        sb.append("\n===== ⚠️ ERROR SUMMARY =====\n");
+        sb.append("Total Errors: ").append(errorEvents.size()).append("\n");
+        sb.append("Error Rate: ").append(String.format("%.2f%%", errorRate)).append("\n");
+        sb.append("Top Error Source: ").append(topErrorSource).append("\n");
+        sb.append("Most Frequent Error: ").append(topErrorMessage).append("\n");
+        sb.append("===============================\n");
+
+        return sb.toString();
     }
 
     private <T> String findMostFrequent(List<LogEvent> events, Function<LogEvent, T> classifier) {
