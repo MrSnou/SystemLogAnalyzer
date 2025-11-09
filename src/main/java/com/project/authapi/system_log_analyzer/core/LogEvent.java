@@ -1,13 +1,14 @@
 package com.project.authapi.system_log_analyzer.core;
 
 
-import org.springframework.format.annotation.DateTimeFormat;
+
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 // Log Class for outside logs
+@Component
 public record LogEvent(LocalDateTime timestamp,
         LogLevel level,
         String source,
@@ -36,6 +37,10 @@ public record LogEvent(LocalDateTime timestamp,
                 customLevel == null ? "APP" : customLevel,
                 message
         );
+    }
+
+    public String getEventType() {
+        return level.toString();
     }
 
     public boolean isError() {

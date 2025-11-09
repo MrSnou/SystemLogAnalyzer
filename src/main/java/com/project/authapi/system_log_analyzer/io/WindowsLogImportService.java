@@ -1,11 +1,13 @@
 package com.project.authapi.system_log_analyzer.io;
 
 import com.project.authapi.system_log_analyzer.core.LogEvent;
+import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
+@Component
 public class WindowsLogImportService {
     private final WindowsEventExporter exporter = new WindowsEventExporter();
     private final WindowsEventParser parser = new WindowsEventParser();

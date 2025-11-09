@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="557.0" prefWidth="866.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.project.authapi.system_log_analyzer.controller.LogAnalyzerFXController">
+   <children>
+      <Button fx:id="scanButton" alignment="CENTER" layoutX="392.0" layoutY="463.0" mnemonicParsing="false" onAction="#scan" text="Scan" textAlignment="CENTER">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Button>
+      <TextField fx:id="logFilesDirField" editable="false" layoutX="206.0" layoutY="164.0" prefHeight="25.0" prefWidth="455.0" />
+      <Label layoutX="378.0" layoutY="111.0" text="Log files dir*">
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Label>
+      <TextField fx:id="reportDirField" editable="false" layoutX="206.0" layoutY="266.0" prefHeight="25.0" prefWidth="455.0" />
+      <Label layoutX="384.0" layoutY="221.0" text="Report dir*">
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Label>
+      <Label fx:id="informationLabel" alignment="CENTER" layoutX="167.0" layoutY="385.0" prefHeight="51.0" prefWidth="533.0" text="Plaese enter data">
+         <font>
+            <Font size="22.0" />
+         </font>
+      </Label>
+      <Button fx:id="logFilesDirButton" layoutX="661.0" layoutY="164.0" mnemonicParsing="false" onAction="#chooseLogDir" text="..." />
+      <Button fx:id="reportDirButton" layoutX="661.0" layoutY="266.0" mnemonicParsing="false" onAction="#chooseReportDir" text="..." />
+   </children>
+</AnchorPane>
