@@ -39,8 +39,14 @@ public record LogEvent(LocalDateTime timestamp,
         );
     }
 
-    public String getEventType() {
-        return level.toString();
+    public LogLevel getLevel() {
+        return level;
+    }
+    public String getSource() {
+        return source;
+    }
+    public String getMessage() {
+        return message;
     }
 
     public boolean isError() {

@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 // TODO - HERE
-@Controller
 public class MainWindowFXController {
     @FXML private Label totalLabel;
     @FXML private Label eventsLabel;
@@ -36,29 +35,39 @@ public class MainWindowFXController {
     }
 
     public void setData(List<LogEvent> events) {
-        totalLabel.setText("Total Events : " + events.size());
-        eventsLabel.setText(events.stream().map(LogEvent::toString).collect(Collectors.joining(LogLevel.error.toString())));
-        warningsLabel.setText(events.stream().map(LogEvent::toString).collect(Collectors.joining(LogLevel.warn.toString())));
-        frequentLabel.setText(events.stream().map(LogEvent::toString).collect(Collectors.joining(LogLevel.info.toString())));
-//        logTable.getItems().setAll(events);
-//
-//        if (logTable.getItems().size() == 0 || logTable.getItems() == null) {
-//            totalLabel.setText("0");
-//            warningsLabel.setText("0");
-//            frequentLabel.setText("0");
-//        }
-//
-//        totalLabel.setText("Total number of log entries processed: " + events.size());
-//        long errors = events.stream().filter(e -> e.getEventType().equals("ERROR")).count();
-//        long warnings = events.stream().filter(e -> e.getEventType().equals("WARN")).count();
-//        String frequent = events.stream()
-//                .collect(Collectors.groupingBy(LogEvent::getEventType, Collectors.counting()))
-//                .entrySet().stream().max(Map.Entry.comparingByValue())
-//                .map(Map.Entry::getKey).orElse("N/A");
-//
-//        eventsLabel.setText("Number of error events: " + errors);
-//        warningsLabel.setText("Number of warning events: " + warnings);
-//        frequentLabel.setText("Most frequent event type: " + frequent);
+        if (events == null || events.isEmpty()) {
+            totalLabel.setText("Total number of log entries processed: 0");
+            eventsLabel.setText("Number of error events: 0");
+            warningsLabel.setText("Number of warning events: 0");
+            frequentLabel.setText("Most frequent event type: N/A");
+            return;
+        }
+
+        logTable.getItems().setAll(events);
+
+        totalLabel.setText("Total number of log entries processed:" + events.size());
+
+        long errors = events.stream()
+                .filter(e -> e.getLevel() == LogLevel.error)
+                .count();
+
+        long warnings = events.stream()
+                .filter(e -> e.getLevel() == LogLevel.warn).count();
+
+        String mostFrequent = events.stream()
+                .collect(Collectors.groupingBy(LogEvent::getLevel, Collectors.counting()))
+                .entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .map(Enum::name)
+                .orElse("N/A");
+
+        eventsLabel.setText("Number of error events: " + errors);
+        warningsLabel.setText("Number of warning events: " + warnings);
+        frequentLabel.setText("Most frequent event type: " + mostFrequent);
+
+
+
     }
 
 

@@ -18,7 +18,7 @@ public class SystemLogAnalyzerApp extends Application {
 
     @Override
     public void init() {
-        //springContext = new SpringApplicationBuilder(SystemLogAnalyzerSpringBoot.class).run();
+        //springContext = new SpringApplicationBuilder(SystemLogAnalyzerSpringBoot.class).run();  TODO - <<[BUG] Consider defining a bean of type 'java.time.LocalDateTime' in your configuration.
     }
 
     @Override
