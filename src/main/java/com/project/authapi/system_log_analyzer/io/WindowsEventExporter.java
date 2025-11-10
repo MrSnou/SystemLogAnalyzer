@@ -15,8 +15,8 @@ public class WindowsEventExporter {
 
     public enum LogType {
         APPLICATION("Application"),
-        SYSTEM("System"),
-        SECURITY("Security");
+        SYSTEM("System");
+        //SECURITY("Security");  TODO Later fix "System.UnauthorizedAccessException,Microsoft.PowerShell.Commands.GetWinEventCommand"
         private final String logName;
         LogType(String logName) {
             this.logName = logName;

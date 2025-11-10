@@ -39,6 +39,10 @@ public record LogEvent(LocalDateTime timestamp,
         );
     }
 
+    public String getTimestamp() {
+        return timestamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
     public LogLevel getLevel() {
         return level;
     }

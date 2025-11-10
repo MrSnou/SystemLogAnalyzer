@@ -37,7 +37,6 @@ public class WindowsEventParser {
             while ((line = br.readLine()) != null ) {
                 if (skipHeader) {skipHeader = false; continue;} // Skip the headers line in CSV file
 
-                //String[] fields = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
                 String[] fields = line.split(",", 5);
 
                 for (int i = 0; i < fields.length; i++) {
@@ -55,7 +54,7 @@ public class WindowsEventParser {
         return Collections.emptyList();
     }
 
-    // Take line and parse it to DTO
+    // Take line and parse it to DTO (Here LogEvent Object is created)
     private LogEvent parseLine(String[] columns) {
         if (columns.length < 5) return null;
 
@@ -105,9 +104,9 @@ public class WindowsEventParser {
         if (levelDisplayName == null) return LogLevel.unknown;
 
         return switch (levelDisplayName.toLowerCase()) {
-            case "error", "critical" -> LogLevel.error;
-            case "warning" -> LogLevel.warn;
-            case "information", "info" -> LogLevel.info;
+            case "error", "critical", "błąd", "krytyczny", "krytyczne" -> LogLevel.error;
+            case "warning", "ostrzeżenie", "ostrzeżenia" -> LogLevel.warn;
+            case "information", "informacje", "informacja", "info" -> LogLevel.info;
                     default -> LogLevel.debug;
         };
     }

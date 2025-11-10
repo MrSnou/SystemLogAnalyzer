@@ -2,20 +2,14 @@ package com.project.authapi.system_log_analyzer.controller;
 
 import com.project.authapi.system_log_analyzer.core.LogEvent;
 import com.project.authapi.system_log_analyzer.core.LogLevel;
-import com.project.authapi.system_log_analyzer.io.WindowsLogImportService;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import org.springframework.stereotype.Controller;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-// TODO - HERE
 public class MainWindowFXController {
     @FXML private Label totalLabel;
     @FXML private Label eventsLabel;
@@ -23,6 +17,7 @@ public class MainWindowFXController {
     @FXML private Label frequentLabel;
 
     @FXML private TableView<LogEvent> logTable;
+    @FXML private TableColumn<LogEvent, String> timeColumn;
     @FXML private TableColumn<LogEvent, String> eventColumn;
     @FXML private TableColumn<LogEvent, String> descriptionColumn;
     @FXML private TableColumn<LogEvent, String> sourceColumn;
@@ -32,6 +27,38 @@ public class MainWindowFXController {
         eventColumn.setCellValueFactory(new PropertyValueFactory<>("level"));
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("message"));
         sourceColumn.setCellValueFactory(new PropertyValueFactory<>("source"));
+        timeColumn.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
+        timeColumn.setPrefWidth(150);
+        eventColumn.setPrefWidth(60);
+        descriptionColumn.setPrefWidth(604.0);
+        sourceColumn.setPrefWidth(200);
+
+        descriptionColumn.setCellFactory(tc -> { // Auto wrap in description
+            TableCell<LogEvent, String> cell = new TableCell<>() {
+                private final Label label = new Label();
+
+                {
+                    label.setWrapText(true);
+                    label.setMaxWidth(Double.MAX_VALUE);
+                    setGraphic(label);
+                    label.heightProperty().addListener((obs, oldHeight, newHeight) -> {
+                        this.setPrefHeight(newHeight.doubleValue() + 10);
+                    });
+                }
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        label.setText(null);
+                        setGraphic(null);
+                    } else {
+                        label.setText(item);
+                        setGraphic(label);
+                    }
+                }
+            };
+            return cell;
+        });
     }
 
     public void setData(List<LogEvent> events) {
@@ -65,12 +92,5 @@ public class MainWindowFXController {
         eventsLabel.setText("Number of error events: " + errors);
         warningsLabel.setText("Number of warning events: " + warnings);
         frequentLabel.setText("Most frequent event type: " + mostFrequent);
-
-
-
     }
-
-
-
-
 }
