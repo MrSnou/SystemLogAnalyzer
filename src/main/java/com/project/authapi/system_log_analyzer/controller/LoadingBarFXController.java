@@ -1,8 +1,9 @@
 package com.project.authapi.system_log_analyzer.controller;
 
+import com.project.authapi.system_log_analyzer.config.appConfig;
 import com.project.authapi.system_log_analyzer.core.LogEvent;
 import com.project.authapi.system_log_analyzer.io.WindowsEventExporter;
-import com.project.authapi.system_log_analyzer.io.WindowsLogImportService;
+import com.project.authapi.system_log_analyzer.io.WindowsEventParser;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -12,9 +13,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.stage.Stage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 
@@ -22,18 +25,28 @@ import java.util.List;
 public class LoadingBarFXController {
     @FXML private ProgressBar loadingBar;
     @FXML private Label label;
+    @Autowired private WindowsEventExporter exporter;
+    @Autowired private WindowsEventParser parser;
+    @Autowired private appConfig config;
 
     @FXML public void initialize(){
         IO.println("LoadingBarFXController::initialize");
-        Task<List<LogEvent>> loadingTask = new Task<List<LogEvent>>() {
+        System.out.println("Exporter = " + exporter);
+        System.out.println("Config = " + config);
+        Task<List<LogEvent>> loadingTask = new Task<>() {
             @Override
             protected List<LogEvent> call() throws Exception {
                 updateMessage("Scanning system logs...");
-                updateProgress(0,1);
+                updateProgress(0, 1);
 
-                WindowsLogImportService importer = new WindowsLogImportService();
-                IO.println("WLIS created - exporting logs from backend");
-                List<LogEvent> logs = importer.importFromSystem(WindowsEventExporter.LogType.APPLICATION);
+
+                IO.println("exported injected - exporting logs from backend");
+                Path csv = exporter.exportToCsv(WindowsEventExporter.LogType.APPLICATION);
+                if (csv == null) {
+                    updateMessage("Failed to export logs!");
+                    return List.of();
+                }
+                List<LogEvent> logs = parser.parseCsv(csv);
                 IO.println("Logs list exported");
 
                 for (int i = 0; i <= 100; i++) {
@@ -52,8 +65,12 @@ public class LoadingBarFXController {
             try {
                 List<LogEvent> logs = loadingTask.getValue();
 
+                var springContext = com.project.authapi.system_log_analyzer.config.ApplicationContextProvider.getApplicationContext();
+
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/MainWindow.fxml"));
+                loader.setControllerFactory(springContext::getBean);
                 Parent root = loader.load();
+
                 MainWindowFXController controller = loader.getController();
                 controller.setData(logs);
 

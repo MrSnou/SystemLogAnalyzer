@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 // Log Class for outside logs
-@Component
-public record LogEvent(LocalDateTime timestamp,
+public record LogEvent(
+        LocalDateTime timestamp,
         LogLevel level,
         String source,
         String message,

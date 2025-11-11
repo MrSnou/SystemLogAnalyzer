@@ -1,16 +1,21 @@
 package com.project.authapi.system_log_analyzer.core;
 
 
+import com.project.authapi.system_log_analyzer.config.appConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 /** TODO|               List
  **   Make duplicated code method later
@@ -18,12 +23,18 @@ import java.util.Comparator;
 
 @Service
 public class FileLoggerService implements LoggerService {
+    @Autowired
+    private appConfig config;
+    @Autowired
+    private final LogReaderService logReaderService;
+    @Autowired
+    private FileReportExporter reportExporter;
     // Number of logs (Max 5MB per log file)
     private int nOfLogPart = 0;
     // Logs directory
-    private static final File logsDir = new File("C:/BackBoard/logs");
+    private File logsDir;
     // Actual log file
-    private File logFile = new File(logsDir, "log_" + nOfLogPart + ".log");
+    private File logFile;
     // Max Log file size
     private static final long MAX_LOG_SIZE = 5 * 1024 * 1024; // 5 MB
     // Max count of files
@@ -32,26 +43,30 @@ public class FileLoggerService implements LoggerService {
     private LogLevel currentThreshold = LogLevel.info;
 
 
+
+
     @Autowired
-    public FileLoggerService(LogReaderService logReaderService) {
-        try {
+    public FileLoggerService(appConfig config, LogReaderService logReaderService) {
+        this.config = config;
+        this.logReaderService = logReaderService;
+    }
+
+    private void ensureLogFile() {
+        if (logsDir == null) {
+            String path = config.getLogsDir();
+            if (path == null) {
+                throw new IllegalStateException("Logs directory not set!");
+            }
+            logsDir = new File(path);
+            if (!logsDir.exists()) logsDir.mkdirs();
+            logFile = new File(logsDir, "log_" + nOfLogPart + ".log");
             createLogFileIfMissing();
-
-        } catch (Exception ex){
-            LogEvent logEntry = new LogEvent(
-                    LocalDateTime.now(), LogLevel.debug,
-                    "APP", "Exception in FileLoggerService",
-                    null, null
-            );
-
-            IO.println(logEntry.toString() + "\n" + ex.getMessage());
-            ex.printStackTrace();
         }
-        Runtime.getRuntime().addShutdownHook(new Thread(this::flushLogToMainFile)); // WholeLog.log File at System.exit(O) - No problem exit
     }
 
     @Override
     public void log(String message) {
+        ensureLogFile();
         LogEvent logEntry = new LogEvent(
                 LocalDateTime.now(), LogLevel.debug,
                 "APP", message,
@@ -78,6 +93,7 @@ public class FileLoggerService implements LoggerService {
     }
     @Override
     public void log(LogLevel level, String message) {
+        ensureLogFile();
         LogEvent logEntry = new LogEvent(
                 LocalDateTime.now(), level,
                 "APP", message,
@@ -105,6 +121,7 @@ public class FileLoggerService implements LoggerService {
     }
     @Override
     public void error(LogLevel level, Throwable t) {
+        ensureLogFile();
         LogEvent logEntry = new LogEvent(
                 LocalDateTime.now(), level,
                 null, t.getMessage(),
@@ -131,6 +148,7 @@ public class FileLoggerService implements LoggerService {
     }
     @Override
     public void severe(String customLevel, String message) {
+        ensureLogFile();
         LogEvent logEntry = new LogEvent(
                 LocalDateTime.now(), LogLevel.info,
                 "APP", message,
@@ -184,6 +202,7 @@ public class FileLoggerService implements LoggerService {
     }
 
     private void createLogFileIfMissing() {
+        ensureLogFile();
         if (!logsDir.exists()) logsDir.mkdirs();    // Create directory
         if (!logFile.exists()) {                    // Create file
             try {
@@ -200,20 +219,34 @@ public class FileLoggerService implements LoggerService {
         }
     }
     // Save all logs to one big file at System.exit(0)
-    private void flushLogToMainFile() {
+    public void flushLogToMainFile() {
+        ensureLogFile();
         String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
         File wholeFile = new File(logsDir, "WholeLog_" + date +".log");   // Create whole log file with unique name
-        LogReaderService logReaderService = new LogReaderService();
-        try (FileWriter fw = new FileWriter(wholeFile, true)){          // Create file
 
-            for (String log : logReaderService.readAllLogs()) {          // Fetch for all logs in pure String format
-                fw.write(log);                                           // Save them in file
-                fw.write(System.lineSeparator());                        // Make sure to not merge lines
-
+        try (FileWriter fw = new FileWriter(wholeFile, StandardCharsets.UTF_8, true)) {
+            File[] logFiles = logsDir.listFiles((dir, name) -> name.endsWith(".log") && !name.startsWith("WholeLog"));  // find all log files
+            if (logFiles == null || logFiles.length == 0) {                     // skip empty ones
+                System.out.println("No log files found to flush.");
+                return;
             }
-            fw.write("=== SESSION ENDED AT "                     // Leave date at exit
-                    + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")) + " ===\n");
-            fw.flush();                                                  // Self-explanatory
+
+            Arrays.sort(logFiles, Comparator.comparingLong(File::lastModified)); // sort them
+
+            for (File file : logFiles) {  // Smack all into one big WholeLog
+                List<String> lines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
+                for (String line : lines) {
+                    fw.write(line);
+                    fw.write(System.lineSeparator());
+                }
+            }
+
+            fw.write("=== SESSION ENDED AT " + date + " ===" + System.lineSeparator());
+            fw.flush();
+            System.out.println("WholeLog file successfully created: " + wholeFile.getAbsolutePath());
+
+            reportExporter.generateAndExportReport();
+
         } catch (IOException e) {
             LogEvent logEntry = new LogEvent(
                     LocalDateTime.now(), LogLevel.debug,
@@ -242,6 +275,18 @@ public class FileLoggerService implements LoggerService {
             }
         }
 
+    }
+
+    public void saveParsedLogs(List<LogEvent> events) {
+        ensureLogFile();
+        for (LogEvent event : events) {
+            rotateLogsIfNeeded();
+            try (FileWriter fw = new FileWriter(logFile, true)) {
+                fw.write(event.toString() + System.lineSeparator());
+            } catch (IOException e) {
+                IO.println("Error saving parsed logs: " + e.getMessage());
+            }
+        }
     }
 
     public void setLogLevelThreshold(LogLevel level) {

@@ -1,5 +1,7 @@
 package com.project.authapi.system_log_analyzer;
 
+import com.project.authapi.system_log_analyzer.core.FileLoggerService;
+import com.project.authapi.system_log_analyzer.core.LogReaderService;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -18,13 +20,16 @@ public class SystemLogAnalyzerApp extends Application {
 
     @Override
     public void init() {
-        //springContext = new SpringApplicationBuilder(SystemLogAnalyzerSpringBoot.class).run();  TODO - <<[BUG] Consider defining a bean of type 'java.time.LocalDateTime' in your configuration.
+        springContext = new SpringApplicationBuilder(SystemLogAnalyzerSpringBoot.class).run();
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        FXMLLoader loader =  new FXMLLoader(getClass().getResource("/WelcomeView.fxml"));
+        loader.setControllerFactory(springContext::getBean);
+        loader.setController(springContext.getBean(com.project.authapi.system_log_analyzer.controller.LogAnalyzerFXController.class));
+        Parent root = loader.load();
 
-        Parent root = FXMLLoader.load(getClass().getResource("/WelcomeView.fxml"));
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.setTitle("System Log Analyzer");

@@ -3,6 +3,7 @@ package com.project.authapi.system_log_analyzer.io;
 
 import com.project.authapi.system_log_analyzer.core.LogEvent;
 import com.project.authapi.system_log_analyzer.core.LogLevel;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -17,11 +18,8 @@ import java.util.List;
 
 import static java.lang.System.err;
 
+@Component
 public class WindowsEventParser {
-
-    private static final String[] HEADERS = {
-            "TimeCreated", "Id", "LevelDisplayName", "ProviderName", "Message"
-    };
 
     private static final DateTimeFormatter WINDOWS_DATE_FORMAT =
             DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS");

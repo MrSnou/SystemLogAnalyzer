@@ -1,5 +1,9 @@
 package com.project.authapi.system_log_analyzer.io;
 
+import com.project.authapi.system_log_analyzer.config.appConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -11,28 +15,37 @@ import java.time.format.DateTimeFormatter;
 import static java.lang.System.err;
 
 // Class responsible for exporting logs from Win PowerShell
+@Component
 public class WindowsEventExporter {
 
     public enum LogType {
         APPLICATION("Application"),
         SYSTEM("System");
-        //SECURITY("Security");  TODO Later fix "System.UnauthorizedAccessException,Microsoft.PowerShell.Commands.GetWinEventCommand"
+        //SECURITY("Security");  TODO: Handle permissions "System.UnauthorizedAccessException,Microsoft.PowerShell.Commands.GetWinEventCommand"
+
         private final String logName;
         LogType(String logName) {
             this.logName = logName;
         }
-
         public String getLogName() {
             return logName;
         }
     }
 
-    private static final String EXPORT_DIR = "logs/exported";
+    private appConfig config;
+
+    @Autowired
+    public WindowsEventExporter(appConfig config) {
+        this.config = config;
+    }
 
 
     public Path exportToCsv(LogType type) {
         try {
-            File dir = new File(EXPORT_DIR);
+            String baseDir = config.getLogsDir() != null && !config.getLogsDir().isEmpty()
+                    ? config.getLogsDir() : "logs/exported";
+
+            File dir = new File(baseDir, "exported");
             if (!dir.exists()) dir.mkdirs();
 
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));

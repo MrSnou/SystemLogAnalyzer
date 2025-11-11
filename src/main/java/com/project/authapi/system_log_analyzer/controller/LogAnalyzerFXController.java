@@ -1,8 +1,7 @@
 package com.project.authapi.system_log_analyzer.controller;
 
-import com.project.authapi.system_log_analyzer.core.LogEvent;
-import com.project.authapi.system_log_analyzer.io.WindowsEventExporter;
-import com.project.authapi.system_log_analyzer.io.WindowsLogImportService;
+import com.project.authapi.system_log_analyzer.config.ApplicationContextProvider;
+import com.project.authapi.system_log_analyzer.config.appConfig;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,13 +13,14 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import org.springframework.stereotype.Controller;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
-@Controller
+@Component
 public class LogAnalyzerFXController {
     @FXML
     private Stage stage;
@@ -32,6 +32,13 @@ public class LogAnalyzerFXController {
     private TextField reportDirField;
     @FXML
     private Label informationLabel;
+    @Autowired
+    public appConfig appConfig;
+
+    @FXML
+    public void initialize() {
+        System.out.println("Controller initialized, appConfig = " + appConfig);
+    }
 
 
     @FXML // scan button
@@ -44,7 +51,10 @@ public class LogAnalyzerFXController {
             return;
         }
 
+        ApplicationContext springContext = ApplicationContextProvider.getApplicationContext();
+
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/LoadingScreen.fxml"));
+        loader.setControllerFactory(springContext::getBean); // <-- magiczna linia
         Parent root = loader.load();
 
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -60,7 +70,9 @@ public class LogAnalyzerFXController {
         File selectedDirectory = chooser.showDialog(((Node) event.getSource()).getScene().getWindow());
         if (selectedDirectory != null) {
             logFilesDirField.setText(selectedDirectory.getAbsolutePath());
+            appConfig.setLogsDir(logFilesDirField.getText());
         }
+
     }
 
     @FXML // report file direction button
@@ -70,7 +82,9 @@ public class LogAnalyzerFXController {
         File selectedDirectory = chooser.showDialog(((Node) event.getSource()).getScene().getWindow());
         if (selectedDirectory != null) {
             reportDirField.setText(selectedDirectory.getAbsolutePath());
+            appConfig.setReportDir(reportDirField.getText());
         }
+
     }
 
 

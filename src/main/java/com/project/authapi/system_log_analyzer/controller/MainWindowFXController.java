@@ -1,15 +1,19 @@
 package com.project.authapi.system_log_analyzer.controller;
 
+import com.project.authapi.system_log_analyzer.core.FileLoggerService;
 import com.project.authapi.system_log_analyzer.core.LogEvent;
 import com.project.authapi.system_log_analyzer.core.LogLevel;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Controller
 public class MainWindowFXController {
     @FXML private Label totalLabel;
     @FXML private Label eventsLabel;
@@ -21,6 +25,8 @@ public class MainWindowFXController {
     @FXML private TableColumn<LogEvent, String> eventColumn;
     @FXML private TableColumn<LogEvent, String> descriptionColumn;
     @FXML private TableColumn<LogEvent, String> sourceColumn;
+
+    @Autowired FileLoggerService fileLoggerService;
 
     @FXML
     public void initialize() {
@@ -62,6 +68,7 @@ public class MainWindowFXController {
     }
 
     public void setData(List<LogEvent> events) {
+        fileLoggerService.saveParsedLogs(events);
         if (events == null || events.isEmpty()) {
             totalLabel.setText("Total number of log entries processed: 0");
             eventsLabel.setText("Number of error events: 0");
