@@ -53,6 +53,10 @@ public record LogEvent(
         return message;
     }
 
+    public String getCustomLevel() {
+        return customLevel;
+    }
+
     public boolean isError() {
         return level == LogLevel.error || level == LogLevel.warn;
     }

@@ -9,6 +9,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,6 +29,8 @@ public class MainWindowFXController {
 
     @Autowired FileLoggerService fileLoggerService;
 
+    private List<LogEvent> logs;
+
     @FXML
     public void initialize() {
         eventColumn.setCellValueFactory(new PropertyValueFactory<>("level"));
@@ -38,6 +41,14 @@ public class MainWindowFXController {
         eventColumn.setPrefWidth(60);
         descriptionColumn.setPrefWidth(604.0);
         sourceColumn.setPrefWidth(200);
+
+        logTable.getSelectionModel().selectedItemProperty().addListener(
+                (obs, oldSelection, newSelection) -> {
+                    if (newSelection != null) {
+                        showDetailsPopup(newSelection);
+                    }
+                }
+        );
 
         descriptionColumn.setCellFactory(tc -> { // Auto wrap in description
             TableCell<LogEvent, String> cell = new TableCell<>() {
@@ -68,6 +79,7 @@ public class MainWindowFXController {
     }
 
     public void setData(List<LogEvent> events) {
+        logs = events;
         fileLoggerService.saveParsedLogs(events);
         if (events == null || events.isEmpty()) {
             totalLabel.setText("Total number of log entries processed: 0");
@@ -99,5 +111,38 @@ public class MainWindowFXController {
         eventsLabel.setText("Number of error events: " + errors);
         warningsLabel.setText("Number of warning events: " + warnings);
         frequentLabel.setText("Most frequent event type: " + mostFrequent);
+    }
+
+    public void showDetailsPopup(LogEvent logEvent) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+
+        alert.setHeaderText(
+                "[" + logEvent.getTimestamp() + "] " +
+                        "[" + logEvent.getLevel() + "] - " +
+                        logEvent.getSource()
+        );
+
+        String details =
+                        "-------------------------------------------\n" +
+                        "Additional info:\n" +
+                        logEvent.getCustomLevel() + "\n\n" +
+
+                        "Message: \n" +
+                        logEvent.getMessage() + "\n" +
+                        "-------------------------------------------\n";
+
+        TextArea textArea = new TextArea(details);
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        textArea.setPrefHeight(600);
+        textArea.setPrefWidth(300);
+        textArea.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 13");
+
+        alert.getDialogPane().setContent(textArea);
+        alert.getDialogPane().setPrefSize(650, 400);
+        alert.setResizable(true);
+
+
+        alert.showAndWait();
     }
 }
