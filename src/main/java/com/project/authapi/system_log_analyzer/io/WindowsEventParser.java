@@ -57,7 +57,7 @@ public class WindowsEventParser {
         if (columns.length < 5) return null;
 
         if (!columns[0].matches("\\d{2}\\.\\d{2}\\.\\d{4} \\d{2}:\\d{2}:\\d{2}(,\\d{1,3})?")) {
-            System.out.println("(WindowsEventExporter.parseLine()) Skipping non-date line: " + columns[0]);
+            //System.out.println("(WindowsEventParser.parseLine()) Skipping non-date line: " + columns[0]);
             return null;
         }
 

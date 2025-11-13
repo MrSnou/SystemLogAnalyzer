@@ -1,14 +1,20 @@
 package com.project.authapi.system_log_analyzer.controller;
 
+import com.project.authapi.system_log_analyzer.config.appConfig;
 import com.project.authapi.system_log_analyzer.core.FileLoggerService;
 import com.project.authapi.system_log_analyzer.core.LogEvent;
 import com.project.authapi.system_log_analyzer.core.LogLevel;
+import com.project.authapi.system_log_analyzer.io.WindowsEventExporter;
+import com.project.authapi.system_log_analyzer.io.WindowsEventParser;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +33,17 @@ public class MainWindowFXController {
     @FXML private TableColumn<LogEvent, String> descriptionColumn;
     @FXML private TableColumn<LogEvent, String> sourceColumn;
 
+    @FXML private Button refreshButton;
+
+    @FXML private Label loadingLabel;
+
     @Autowired FileLoggerService fileLoggerService;
+    @Autowired private WindowsEventExporter exporter;
+    @Autowired private WindowsEventParser parser;
 
     private List<LogEvent> logs;
+    @Autowired
+    private appConfig appConfig;
 
     @FXML
     public void initialize() {
@@ -41,6 +55,8 @@ public class MainWindowFXController {
         eventColumn.setPrefWidth(60);
         descriptionColumn.setPrefWidth(604.0);
         sourceColumn.setPrefWidth(200);
+
+        logTable.setFocusTraversable(false);
 
         logTable.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldSelection, newSelection) -> {
@@ -81,6 +97,7 @@ public class MainWindowFXController {
     public void setData(List<LogEvent> events) {
         logs = events;
         fileLoggerService.saveParsedLogs(events);
+
         if (events == null || events.isEmpty()) {
             totalLabel.setText("Total number of log entries processed: 0");
             eventsLabel.setText("Number of error events: 0");
@@ -88,6 +105,9 @@ public class MainWindowFXController {
             frequentLabel.setText("Most frequent event type: N/A");
             return;
         }
+
+        logTable.getSelectionModel().clearSelection();
+        logTable.getFocusModel().focus(-1);
 
         logTable.getItems().setAll(events);
 
@@ -144,5 +164,55 @@ public class MainWindowFXController {
 
 
         alert.showAndWait();
+    }
+
+    public void onRefreshClick() {
+        refreshButton.setDisable(true);
+        logTable.setDisable(true);
+        loadingLabel.setText("Refreshing logs… Please wait. (Time of loading depends on number of logs)");
+
+        Task<List<LogEvent>> task = new Task<List<LogEvent>>() {
+            @Override
+            protected List<LogEvent> call() throws Exception {
+
+                List<Path> csvList = exporter.exportSelected();
+
+                if (csvList == null) {
+                    throw new IllegalStateException("Exporter returned null");
+                }
+                List<LogEvent> logs = new ArrayList<>();
+                for (Path path : csvList) {
+                    logs.addAll(parser.parseCsv(path));
+                }
+
+                return logs;
+            }
+        };
+
+        task.setOnSucceeded(event -> {
+            List<LogEvent> refreshedList = task.getValue();
+
+            logs = refreshedList;
+            setData(logs);
+
+            loadingLabel.setText("");
+            logTable.setDisable(false);
+            refreshButton.setDisable(false);
+        });
+
+        task.setOnFailed(event -> {
+            Throwable error = task.getException();
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setHeaderText("Failed to refresh logs");
+            alert.setContentText(error.getMessage());
+            alert.showAndWait();
+
+            loadingLabel.setText("");
+            logTable.setDisable(false);
+            refreshButton.setDisable(false);
+        });
+
+        new Thread(task).start();
     }
 }

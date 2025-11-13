@@ -11,6 +11,8 @@ import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.lang.System.err;
 
@@ -76,6 +78,22 @@ public class WindowsEventExporter {
             System.err.println("Export failed: " + e.getMessage());
             return null;
         }
+    }
+
+    public List<Path> exportSelected() {
+        List<Path> paths = new ArrayList<>();
+
+        if (config.isCsvApplication()) {
+            Path p = exportToCsv(LogType.APPLICATION);
+            if (p != null) paths.add(p);
+        }
+
+        if (config.isCsvSystem()) {
+            Path p = exportToCsv(LogType.SYSTEM);
+            if (p != null) paths.add(p);
+        }
+
+        return paths;
     }
 
 }

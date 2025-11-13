@@ -8,6 +8,24 @@ import java.io.File;
 public class appConfig {
     private String logsDir;
     private String reportDir;
+    private boolean csvApplication;
+    private boolean csvSystem;
+
+    public boolean isCsvApplication() {
+        return csvApplication;
+    }
+
+    public void setCsvApplication(boolean csvApplication) {
+        this.csvApplication = csvApplication;
+    }
+
+    public boolean isCsvSystem() {
+        return csvSystem;
+    }
+
+    public void setCsvSystem(boolean csvSystem) {
+        this.csvSystem = csvSystem;
+    }
 
     public String getLogsDir() {
         return logsDir;
@@ -23,9 +41,5 @@ public class appConfig {
 
     public void setReportDir(String reportDir) {
         this.reportDir = reportDir;
-    }
-
-    public boolean isReady() {
-        return logsDir != null && reportDir != null;
     }
 }

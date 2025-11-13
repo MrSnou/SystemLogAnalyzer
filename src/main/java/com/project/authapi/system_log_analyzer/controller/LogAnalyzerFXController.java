@@ -9,6 +9,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
@@ -22,18 +23,14 @@ import java.io.IOException;
 
 @Component
 public class LogAnalyzerFXController {
-    @FXML
-    private Stage stage;
-    @FXML
-    private Button scanButton;
-    @FXML
-    private TextField logFilesDirField;
-    @FXML
-    private TextField reportDirField;
-    @FXML
-    private Label informationLabel;
-    @Autowired
-    public appConfig appConfig;
+    @FXML private Button scanButton;
+    @FXML private TextField logFilesDirField;
+    @FXML private TextField reportDirField;
+    @FXML private Label informationLabel;
+    @FXML private CheckBox appButton;
+    @FXML private CheckBox systemButton;
+
+    @Autowired public appConfig appConfig;
 
     @FXML
     public void initialize() {
@@ -48,6 +45,11 @@ public class LogAnalyzerFXController {
 
         if (logDir.isEmpty() || reportDir.isEmpty()) {
             informationLabel.setText("Please select both directories.");
+            return;
+        }
+
+        if (!appButton.isSelected() && !systemButton.isSelected()) {
+            informationLabel.setText("Please select at least one type of logs");
             return;
         }
 
@@ -72,7 +74,6 @@ public class LogAnalyzerFXController {
             logFilesDirField.setText(selectedDirectory.getAbsolutePath());
             appConfig.setLogsDir(logFilesDirField.getText());
         }
-
     }
 
     @FXML // report file direction button
@@ -84,8 +85,18 @@ public class LogAnalyzerFXController {
             reportDirField.setText(selectedDirectory.getAbsolutePath());
             appConfig.setReportDir(reportDirField.getText());
         }
+    }
+
+    @FXML
+    private void appButtonON(ActionEvent event) throws IOException {
+        appConfig.setCsvApplication(appButton.isSelected());
+        IO.println("Application logs export : " + appConfig.isCsvApplication());
 
     }
 
-
+    @FXML
+    private void systemButtonON(ActionEvent event) throws IOException {
+        appConfig.setCsvSystem(systemButton.isSelected());
+        IO.println("System logs export : " + appConfig.isCsvSystem());
+    }
 }

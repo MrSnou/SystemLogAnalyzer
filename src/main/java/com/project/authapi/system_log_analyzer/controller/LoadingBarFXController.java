@@ -18,6 +18,7 @@ import org.springframework.stereotype.Controller;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -41,12 +42,16 @@ public class LoadingBarFXController {
 
 
                 IO.println("exported injected - exporting logs from backend");
-                Path csv = exporter.exportToCsv(WindowsEventExporter.LogType.APPLICATION);
-                if (csv == null) {
+                List<Path> csvList = exporter.exportSelected();
+                if (csvList == null) {
                     updateMessage("Failed to export logs!");
                     return List.of();
                 }
-                List<LogEvent> logs = parser.parseCsv(csv);
+                List<LogEvent> logs = new ArrayList<>();
+                for  (Path path : csvList) {
+                    logs.addAll(parser.parseCsv(path));
+                }
+
                 IO.println("Logs list exported");
 
                 for (int i = 0; i <= 100; i++) {
