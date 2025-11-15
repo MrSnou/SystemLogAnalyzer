@@ -1,75 +1,103 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<?import javafx.scene.control.ProgressIndicator?>
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="675.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.project.authapi.system_log_analyzer.controller.MainWindowFXController">
-   <children>
-      <Label fx:id="totalLabel" text="Total number of log entries processed:">
-         <VBox.margin>
-            <Insets left="20.0" top="20.0" />
-         </VBox.margin>
-         <font>
-            <Font size="14.0" />
-         </font>
-      </Label>
-      <Label fx:id="eventsLabel" text="Number of error events:">
-         <VBox.margin>
-            <Insets left="20.0" top="10.0" />
-         </VBox.margin>
-         <font>
-            <Font size="14.0" />
-         </font>
-      </Label>
-      <Label fx:id="warningsLabel" text="Number of warning events:">
-         <VBox.margin>
-            <Insets left="20.0" top="10.0" />
-         </VBox.margin>
-         <font>
-            <Font size="14.0" />
-         </font>
-      </Label>
-      <Label fx:id="frequentLabel" text="Most frequent event type:">
-         <font>
-            <Font size="14.0" />
-         </font>
-         <VBox.margin>
-            <Insets left="20.0" top="10.0" />
-         </VBox.margin>
-      </Label>
-      <TableView fx:id="logTable" prefHeight="457.0" prefWidth="1059.0">
-        <columns>
-            <TableColumn fx:id="timeColumn" prefWidth="84.0" text="Time" />
-            <TableColumn fx:id="eventColumn" prefWidth="179.0" text="Event" />
-            <TableColumn fx:id="descriptionColumn" prefWidth="604.0" text="Description" />
-            <TableColumn fx:id="sourceColumn" minWidth="0.0" prefWidth="198.0" text="Source" />
-        </columns>
-         <VBox.margin>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-         </VBox.margin>
-         <opaqueInsets>
-            <Insets />
-         </opaqueInsets>
-      </TableView>
-      <Button fx:id="refreshButton" alignment="CENTER" mnemonicParsing="false" onAction="#onRefreshClick" prefHeight="35.0" prefWidth="100.0" text="Refresh" textAlignment="CENTER">
-         <VBox.margin>
-            <Insets bottom="5.0" left="500.0" right="500.0" />
-         </VBox.margin>
-      </Button>
-       <Label fx:id="loadingLabel"
-              text=""
-              alignment="CENTER"
-              maxWidth="Infinity"
-              style="-fx-alignment: center;">
-           <VBox.margin>
-               <Insets bottom="10.0" />
-           </VBox.margin>
-       </Label>
-   </children>
-</VBox>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.project.authapi.system_log_analyzer.controller.MainWindowFXController">
+
+    <!-- top of scene -->
+    <top>
+        <VBox spacing="10">
+            <BorderPane.margin>
+                <Insets top="20" left="20" right="20"/>
+            </BorderPane.margin>
+
+            <!-- Statistics -->
+            <GridPane hgap="40" vgap="10">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="50"/>
+                    <ColumnConstraints percentWidth="50"/>
+                </columnConstraints>
+
+                <children>
+                    <Label fx:id="totalLabel"    GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <Label fx:id="eventsLabel"   GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                    <Label fx:id="warningsLabel" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <Label fx:id="frequentLabel" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                </children>
+            </GridPane>
+
+            <Separator/>
+
+            <!-- Filters -->
+            <VBox spacing="10" alignment="CENTER">
+
+                <HBox spacing="10" alignment="CENTER">
+                    <TextField fx:id="searchField"
+                               promptText="Search..."
+                               onKeyReleased="#onSearchChanged"
+                               HBox.hgrow="ALWAYS"/>
+
+                    <Button text="Clear" onAction="#onClearFilters"/>
+
+                    <Label fx:id="filteredCountLabel"
+                           text="Showing: 0 / 0 entries"
+                           style="-fx-font-size: 13;"/>
+                </HBox>
+
+                <HBox alignment="CENTER" spacing="20">
+                    <CheckBox fx:id="filterInfo"  text="INFO"  onAction="#onFilterChanged"/>
+                    <CheckBox fx:id="filterWarn"  text="WARN"  onAction="#onFilterChanged"/>
+                    <CheckBox fx:id="filterError" text="ERROR" onAction="#onFilterChanged"/>
+                </HBox>
+
+                <Separator/>
+
+            </VBox>
+
+        </VBox>
+    </top>
+
+    <!--  CENTER  -->
+    <center>
+        <TableView fx:id="logTable">
+            <BorderPane.margin>
+                <Insets top="20" bottom="20" left="20" right="20"/>
+            </BorderPane.margin>
+
+            <columns>
+                <TableColumn fx:id="timeColumn"         prefWidth="150" text="Time"/>
+                <TableColumn fx:id="eventColumn"        prefWidth="100" text="Event"/>
+                <TableColumn fx:id="descriptionColumn"  prefWidth="600" text="Description"/>
+                <TableColumn fx:id="sourceColumn"       prefWidth="200" text="Source"/>
+            </columns>
+        </TableView>
+    </center>
+
+    <!-- Under table -->
+    <bottom>
+        <HBox spacing="10" alignment="CENTER">
+            <BorderPane.margin>
+                <Insets top="20" left="20" right="20" bottom="20"/>
+            </BorderPane.margin>
+
+            <Button fx:id="refreshButton"
+                    text="Refresh"
+                    prefWidth="120" prefHeight="35"
+                    onAction="#onRefreshClick"/>
+
+            <Label fx:id="loadingLabel"
+                   text=""
+                   style="-fx-alignment: center;"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>
+

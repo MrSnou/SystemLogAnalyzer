@@ -22,28 +22,34 @@ import java.util.stream.Collectors;
 
 @Controller
 public class MainWindowFXController {
+    // TOP
     @FXML private Label totalLabel;
     @FXML private Label eventsLabel;
     @FXML private Label warningsLabel;
     @FXML private Label frequentLabel;
-
+    // Search bar
+    @FXML private TextField searchField;
+    @FXML private Label filteredCountLabel;
+    @FXML private CheckBox filterInfo;
+    @FXML private CheckBox filterWarn;
+    @FXML private CheckBox filterError;
+    // table
     @FXML private TableView<LogEvent> logTable;
     @FXML private TableColumn<LogEvent, String> timeColumn;
     @FXML private TableColumn<LogEvent, String> eventColumn;
     @FXML private TableColumn<LogEvent, String> descriptionColumn;
     @FXML private TableColumn<LogEvent, String> sourceColumn;
-
+    // under table
     @FXML private Button refreshButton;
-
     @FXML private Label loadingLabel;
-
+    // injections from backend
     @Autowired FileLoggerService fileLoggerService;
     @Autowired private WindowsEventExporter exporter;
     @Autowired private WindowsEventParser parser;
-
+    @Autowired private appConfig appConfig;
+    // local vars
     private List<LogEvent> logs;
-    @Autowired
-    private appConfig appConfig;
+
 
     @FXML
     public void initialize() {
@@ -52,7 +58,7 @@ public class MainWindowFXController {
         sourceColumn.setCellValueFactory(new PropertyValueFactory<>("source"));
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
         timeColumn.setPrefWidth(150);
-        eventColumn.setPrefWidth(60);
+        eventColumn.setPrefWidth(90);
         descriptionColumn.setPrefWidth(604.0);
         sourceColumn.setPrefWidth(200);
 
@@ -215,4 +221,68 @@ public class MainWindowFXController {
 
         new Thread(task).start();
     }
+    @FXML
+    public void onSearchChanged() {
+        applyFilters();
+    }
+
+    @FXML
+    public void onClearFilters() {
+        searchField.clear();
+        filterInfo.setSelected(false);
+        filterWarn.setSelected(false);
+        filterError.setSelected(false);
+
+        applyFilters();
+    }
+
+    @FXML
+    public void onFilterChanged() {
+        applyFilters();
+    }
+
+    // Helper method for filters
+    private void applyFilters() {
+        if (logs == null) return;
+
+        String input = searchField.getText().toLowerCase().trim();
+
+        // input correctness check
+        input = input.replaceAll("[<>]", ""); // No scripts
+        input = input.replaceAll("\\p{Cntrl}", "");
+
+        String safeInput = input;
+
+        boolean info = filterInfo.isSelected();
+        boolean warn = filterWarn.isSelected();
+        boolean error = filterError.isSelected();
+
+        List<LogEvent> filtered = logs.stream().filter( log -> {
+            if (info || warn || error) {
+                LogLevel lvl = log.getLevel();
+                if (lvl == LogLevel.info && !info) return false;
+                if (lvl == LogLevel.warn && !warn) return false;
+                if (lvl == LogLevel.error && !error) return false;
+
+                if (lvl == LogLevel.debug || lvl == LogLevel.unknown) return false;
+            }
+
+            if (!safeInput.isEmpty()) {
+                String combined = (
+                        log.getMessage() + " " +
+                                log.getSource() + " " +
+                                log.getLevel() + " " +
+                                log.getTimestamp()
+                ).toLowerCase();
+
+                if (!combined.contains(safeInput)) return false;
+            }
+
+            return true;
+
+        }).toList();
+        logTable.getItems().setAll(filtered);
+        filteredCountLabel.setText("Showing: " + filtered.size() + " / " + logs.size() + " entries");
+    }
+
 }

@@ -23,7 +23,7 @@ public class AppShutdownHandler {
     @EventListener(ContextClosedEvent.class)
     public void onShutdown() {
         try {
-            System.out.println("AppShutdownHandler - Application is shutting down — flushing logs and exporting report...");
+            System.out.println("AppShutdownHandler - Application is shutting down! Flushing logs and exporting report...");
 
             fileLoggerService.flushLogToMainFile();
 
