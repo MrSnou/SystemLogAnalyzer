@@ -2,7 +2,6 @@ package com.project.authapi.system_log_analyzer.system;
 
 import com.project.authapi.system_log_analyzer.core.FileLoggerService;
 import com.project.authapi.system_log_analyzer.core.FileReportExporter;
-import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;

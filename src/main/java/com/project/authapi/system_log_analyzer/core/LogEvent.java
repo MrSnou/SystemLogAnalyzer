@@ -1,9 +1,5 @@
 package com.project.authapi.system_log_analyzer.core;
 
-
-
-import org.springframework.stereotype.Component;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -23,9 +19,6 @@ public record LogEvent(
 
         if (level == null)
             throw new IllegalArgumentException("LogLevel cannot be null.");
-
-        //if (message == null || message.isBlank())
-        //    throw new IllegalArgumentException("Message cannot be blank.");
 
     }
 

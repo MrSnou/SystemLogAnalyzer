@@ -1,15 +1,12 @@
 package com.project.authapi.system_log_analyzer.core;
 
 import com.project.authapi.system_log_analyzer.config.appConfig;
-import com.project.authapi.system_log_analyzer.io.WindowsEventExporter;
-import com.project.authapi.system_log_analyzer.io.WindowsEventParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;

@@ -1,7 +1,6 @@
 package com.project.authapi.system_log_analyzer.core;
 
 import com.project.authapi.system_log_analyzer.config.appConfig;
-import com.project.authapi.system_log_analyzer.io.WindowsEventExporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

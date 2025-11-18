@@ -32,8 +32,6 @@ public class LoadingBarFXController {
 
     @FXML public void initialize(){
         IO.println("LoadingBarFXController::initialize");
-        System.out.println("Exporter = " + exporter);
-        System.out.println("Config = " + config);
         Task<List<LogEvent>> loadingTask = new Task<>() {
             @Override
             protected List<LogEvent> call() throws Exception {

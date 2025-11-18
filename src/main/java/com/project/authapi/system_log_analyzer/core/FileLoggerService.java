@@ -3,9 +3,7 @@ package com.project.authapi.system_log_analyzer.core;
 
 import com.project.authapi.system_log_analyzer.config.appConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;

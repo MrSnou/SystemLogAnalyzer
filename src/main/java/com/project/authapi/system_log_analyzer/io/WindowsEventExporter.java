@@ -14,8 +14,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.lang.System.err;
-
 // Class responsible for exporting logs from Win PowerShell
 @Component
 public class WindowsEventExporter {

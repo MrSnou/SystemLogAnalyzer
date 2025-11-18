@@ -1,7 +1,5 @@
 package com.project.authapi.system_log_analyzer;
 
-import com.project.authapi.system_log_analyzer.core.FileLoggerService;
-import com.project.authapi.system_log_analyzer.core.LogReaderService;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -10,8 +8,6 @@ import javafx.stage.Stage;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
-
-import static javafx.application.Application.launch;
 
 @SpringBootApplication
 public class SystemLogAnalyzerApp extends Application {

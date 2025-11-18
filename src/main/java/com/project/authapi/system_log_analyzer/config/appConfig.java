@@ -2,8 +2,6 @@ package com.project.authapi.system_log_analyzer.config;
 
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-
 @Component
 public class appConfig {
     private String logsDir;
