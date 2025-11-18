@@ -22,7 +22,7 @@ import java.io.File;
 import java.io.IOException;
 
 @Component
-public class LogAnalyzerFXController {
+public class WelcomeViewFXController {
     @FXML private Button scanButton;
     @FXML private TextField logFilesDirField;
     @FXML private TextField reportDirField;
@@ -55,7 +55,7 @@ public class LogAnalyzerFXController {
 
         ApplicationContext springContext = ApplicationContextProvider.getApplicationContext();
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/LoadingScreen.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LoadingScreen.fxml"));
         loader.setControllerFactory(springContext::getBean); // <-- magiczna linia
         Parent root = loader.load();
 

@@ -70,7 +70,7 @@ public class LoadingBarFXController {
 
                 var springContext = com.project.authapi.system_log_analyzer.config.ApplicationContextProvider.getApplicationContext();
 
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/MainWindow.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainWindow.fxml"));
                 loader.setControllerFactory(springContext::getBean);
                 Parent root = loader.load();
 

@@ -1,5 +1,6 @@
 package com.project.authapi.system_log_analyzer;
 
+import com.project.authapi.system_log_analyzer.controller.WelcomeViewFXController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -21,9 +22,9 @@ public class SystemLogAnalyzerApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        FXMLLoader loader =  new FXMLLoader(getClass().getResource("/WelcomeView.fxml"));
+        FXMLLoader loader =  new FXMLLoader(getClass().getResource("/view/WelcomeView.fxml"));
         loader.setControllerFactory(springContext::getBean);
-        loader.setController(springContext.getBean(com.project.authapi.system_log_analyzer.controller.LogAnalyzerFXController.class));
+        loader.setController(springContext.getBean(WelcomeViewFXController.class));
         Parent root = loader.load();
 
         Scene scene = new Scene(root);
