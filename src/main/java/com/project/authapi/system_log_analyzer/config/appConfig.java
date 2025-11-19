@@ -8,6 +8,15 @@ public class appConfig {
     private String reportDir;
     private boolean csvApplication;
     private boolean csvSystem;
+    private boolean csvSecurity;
+
+    public boolean isCsvSecurity() {
+        return csvSecurity;
+    }
+
+    public void setCsvSecurity(boolean csvSecurity) {
+        this.csvSecurity = csvSecurity;
+    }
 
     public boolean isCsvApplication() {
         return csvApplication;

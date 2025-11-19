@@ -8,10 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +26,8 @@ public class WelcomeViewFXController {
     @FXML private Label informationLabel;
     @FXML private CheckBox appButton;
     @FXML private CheckBox systemButton;
+    @FXML private CheckBox securityButton;
+    @FXML private Label securityLabel;
 
     @Autowired public appConfig appConfig;
 
@@ -48,15 +47,17 @@ public class WelcomeViewFXController {
             return;
         }
 
-        if (!appButton.isSelected() && !systemButton.isSelected()) {
+        if (!appButton.isSelected() && !systemButton.isSelected() && !securityButton.isSelected()) {
             informationLabel.setText("Please select at least one type of logs");
             return;
         }
 
+
+
         ApplicationContext springContext = ApplicationContextProvider.getApplicationContext();
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LoadingScreen.fxml"));
-        loader.setControllerFactory(springContext::getBean); // <-- magiczna linia
+        loader.setControllerFactory(springContext::getBean); // Spring Boot starter by JavaFX !!IMPORTANT!!
         Parent root = loader.load();
 
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -98,5 +99,34 @@ public class WelcomeViewFXController {
     private void systemButtonON(ActionEvent event) throws IOException {
         appConfig.setCsvSystem(systemButton.isSelected());
         IO.println("System logs export : " + appConfig.isCsvSystem());
+    }
+
+    @FXML
+    private void securityButtonON(ActionEvent event) throws IOException {
+        if (securityButton.isSelected()) {
+            boolean proceed = askForSecurityPermission();
+            if (!proceed) {
+                securityButton.setSelected(false);
+                securityLabel.setText("Admin permission required!");
+                appConfig.setCsvSecurity(false);
+                return;
+            } else {
+                securityLabel.setText("Admin permission granted!");
+                appConfig.setCsvSecurity(true);
+            }
+        } else {
+            appConfig.setCsvSecurity(false);
+            securityLabel.setText("(Requires Admin Permission)");
+        }
+    }
+
+    private boolean askForSecurityPermission() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Administrator permission required");
+        alert.setHeaderText("Security log requires admin privileges");
+        alert.setContentText("To read Security logs, Windows requires administrator approval.\n\n" +
+                "Click OK to continue (you may see a UAC popup).");
+
+        return alert.showAndWait().filter(btn -> btn == ButtonType.OK).isPresent();
     }
 }

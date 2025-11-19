@@ -20,8 +20,8 @@ public class WindowsEventExporter {
 
     public enum LogType {
         APPLICATION("Application"),
-        SYSTEM("System");
-        //SECURITY("Security");  TODO: Handle permissions "System.UnauthorizedAccessException,Microsoft.PowerShell.Commands.GetWinEventCommand"
+        SYSTEM("System"),
+        SECURITY("Security"); // TODO - Test in real environment (.exe/.jar)
 
         private final String logName;
         LogType(String logName) {
@@ -40,7 +40,7 @@ public class WindowsEventExporter {
     }
 
 
-    public Path exportToCsv(LogType type) {
+    public Path exportToCsv(LogType type) { // Method responsible for exporting logs from windows
         try {
             String baseDir = config.getLogsDir() != null && !config.getLogsDir().isEmpty()
                     ? config.getLogsDir() : "logs/exported";
@@ -78,6 +78,42 @@ public class WindowsEventExporter {
         }
     }
 
+    public Path exportSecurityLogsAsAdmin() {  // Method responsible for exporting Security logs with admin permissions
+        try {
+            String baseDir = config.getLogsDir() != null && !config.getLogsDir().isEmpty()
+                    ? config.getLogsDir() : "logs/exported";
+
+            File dir = new File(baseDir, "exported");
+            if (!dir.exists()) dir.mkdirs();
+
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            Path outputFile = Path.of(dir.getAbsolutePath(), "Security_" + timestamp + ".csv");
+
+            String powershellCommand =
+                    "Start-Process powershell -Verb RunAs -ArgumentList " +
+                            "\"Get-WinEvent -LogName Security | " +
+                            "Select-Object TimeCreated, Id, LevelDisplayName, ProviderName, Message | " +
+                            "Export-Csv -Path '" + outputFile.toAbsolutePath() + "' -NoTypeInformation -Encoding UTF8\"";
+
+            ProcessBuilder pb = new ProcessBuilder("Powershell.exe", "-Command", powershellCommand);
+            Process process = pb.start();
+
+            int exit = process.waitFor();
+
+            if (exit == 0) {
+                IO.println("Security log exported successfully as admin: " + outputFile);
+                return outputFile;
+            } else {
+                System.err.println("Powershell.exe security logs failed. Exit code: " + exit);
+            }
+
+        } catch (IOException | InterruptedException e) {
+            System.err.println("Security log exported failed: " + e.getMessage());
+            return null;
+        }
+        return null;
+    }
+
     public List<Path> exportSelected() {
         List<Path> paths = new ArrayList<>();
 
@@ -91,7 +127,14 @@ public class WindowsEventExporter {
             if (p != null) paths.add(p);
         }
 
+        if (config.isCsvSecurity()) {
+            Path p = exportSecurityLogsAsAdmin();
+            if (p != null) paths.add(p);
+        }
+
         return paths;
     }
+
+
 
 }
