@@ -16,14 +16,14 @@ searching and detailed inspection of each event.
 
 ## Features
 
-  Windows Event Log support:
+Windows Event Log support:
 
 - **Application logs**
 - **System logs**
 - **Security logs (requires UAC elevation — handled automatically)**
 **Logs are exported directly using Get-WinEvent from PowerShell.**
 
-  Clean and responsive UI (JavaFX 25):
+Clean and responsive UI (JavaFX 25):
 
 - **Fast event table**
 - **Click any entry to show full details in a popup**
@@ -31,7 +31,7 @@ searching and detailed inspection of each event.
 - **Dynamic resizing**
 - **Smooth loading screen with a background task**
 
-  Filtering & Advanced Search
+Filtering & Advanced Search
 
 - **Real-time search bar**
 - **Input sanitization for safe searching**
@@ -40,7 +40,7 @@ searching and detailed inspection of each event.
 
 ## Why this app exists
 
-  Windows Event Viewer is:
+Windows Event Viewer is:
 
 - **slow**
 - **unintuitive**
@@ -48,7 +48,7 @@ searching and detailed inspection of each event.
 - **difficult to filter**
 - **prone to freezing**
 
-  System Log Analyzer offers:
+System Log Analyzer offers:
 
 - **fast CSV export**
 - **instant searching**
@@ -57,7 +57,7 @@ searching and detailed inspection of each event.
 - **responsive UI**
 - **predictable performance**
 
-  Perfect for:
+Perfect for:
 
 - **system administrators**
 - **support engineers**
@@ -77,15 +77,15 @@ searching and detailed inspection of each event.
   The backend (Spring Core) is embedded inside the JavaFX application and
   initialized manually during startup — ensuring full control over application flow.
 
-  📦 Distribution (EXE version)
+## 📦 Distribution (EXE version)
   A standalone EXE build using Launch4j (with bundled JRE) will be released soon.
 
-  Final structure:
+Final structure:
 - **System_Log_Analyzer.exe**
 - **/lib**   (all required libraries)
 - **/jre**   (bundled JRE 25)
 
-  (No Java installation needed!)
+(No Java installation needed!)
 
 
   📝 License
