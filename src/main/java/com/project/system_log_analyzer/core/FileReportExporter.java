@@ -1,6 +1,7 @@
-package com.project.authapi.system_log_analyzer.core;
+package com.project.system_log_analyzer.core;
 
-import com.project.authapi.system_log_analyzer.config.appConfig;
+import com.project.system_log_analyzer.config.SpringConfig;
+import com.project.system_log_analyzer.config.appConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,8 +29,10 @@ public class FileReportExporter {
 
     public void export(String reportContent) {
         String dirPath = config.getReportDir();
-        if (dirPath == null || dirPath.isEmpty()) {
-            throw new IllegalStateException("Report directory not set!");
+
+        if (!SpringConfig.APP_READY || config.getReportDir() == null) {
+            System.out.println("FileReportExporter: report directory not set — skipping export.");
+            return;
         }
 
         File reportDir = new File(dirPath);

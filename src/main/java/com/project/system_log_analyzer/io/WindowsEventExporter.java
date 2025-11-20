@@ -1,6 +1,6 @@
-package com.project.authapi.system_log_analyzer.io;
+package com.project.system_log_analyzer.io;
 
-import com.project.authapi.system_log_analyzer.config.appConfig;
+import com.project.system_log_analyzer.config.appConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

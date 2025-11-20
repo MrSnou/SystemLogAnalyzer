@@ -1,4 +1,4 @@
-package com.project.authapi.system_log_analyzer.core;
+package com.project.system_log_analyzer.core;
 
 public enum LogLevel {
     debug, // 0 - SYSTEM Custom errors (also in printed in console before death)

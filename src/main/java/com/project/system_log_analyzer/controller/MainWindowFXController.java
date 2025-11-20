@@ -1,11 +1,11 @@
-package com.project.authapi.system_log_analyzer.controller;
+package com.project.system_log_analyzer.controller;
 
-import com.project.authapi.system_log_analyzer.config.appConfig;
-import com.project.authapi.system_log_analyzer.core.FileLoggerService;
-import com.project.authapi.system_log_analyzer.core.LogEvent;
-import com.project.authapi.system_log_analyzer.core.LogLevel;
-import com.project.authapi.system_log_analyzer.io.WindowsEventExporter;
-import com.project.authapi.system_log_analyzer.io.WindowsEventParser;
+import com.project.system_log_analyzer.config.appConfig;
+import com.project.system_log_analyzer.core.FileLoggerService;
+import com.project.system_log_analyzer.core.LogEvent;
+import com.project.system_log_analyzer.core.LogLevel;
+import com.project.system_log_analyzer.io.WindowsEventExporter;
+import com.project.system_log_analyzer.io.WindowsEventParser;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;

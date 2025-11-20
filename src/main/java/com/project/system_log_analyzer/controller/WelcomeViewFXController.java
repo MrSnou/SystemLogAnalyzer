@@ -1,7 +1,7 @@
-package com.project.authapi.system_log_analyzer.controller;
+package com.project.system_log_analyzer.controller;
 
-import com.project.authapi.system_log_analyzer.config.ApplicationContextProvider;
-import com.project.authapi.system_log_analyzer.config.appConfig;
+import com.project.system_log_analyzer.config.ApplicationContextProvider;
+import com.project.system_log_analyzer.config.appConfig;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;

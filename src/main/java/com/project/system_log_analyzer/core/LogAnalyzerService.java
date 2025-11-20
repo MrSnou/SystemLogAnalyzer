@@ -1,4 +1,4 @@
-package com.project.authapi.system_log_analyzer.core;
+package com.project.system_log_analyzer.core;
 
 import org.springframework.stereotype.Service;
 

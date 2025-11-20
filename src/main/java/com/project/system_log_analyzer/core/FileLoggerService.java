@@ -1,7 +1,8 @@
-package com.project.authapi.system_log_analyzer.core;
+package com.project.system_log_analyzer.core;
 
 
-import com.project.authapi.system_log_analyzer.config.appConfig;
+import com.project.system_log_analyzer.config.SpringConfig;
+import com.project.system_log_analyzer.config.appConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.File;
@@ -50,11 +51,17 @@ public class FileLoggerService implements LoggerService {
     }
 
     private void ensureLogFile() {
+        if (!SpringConfig.APP_READY) {
+            return;
+        }
+
         if (logsDir == null) {
             String path = config.getLogsDir();
             if (path == null) {
-                throw new IllegalStateException("Logs directory not set!");
+                System.out.println("FileLoggerService: logsDir not set yet — skipping log.");
+                return; //
             }
+
             logsDir = new File(path);
             if (!logsDir.exists()) logsDir.mkdirs();
             logFile = new File(logsDir, "log_" + nOfLogPart + ".log");

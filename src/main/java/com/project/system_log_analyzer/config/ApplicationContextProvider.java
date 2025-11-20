@@ -1,4 +1,4 @@
-package com.project.authapi.system_log_analyzer.config;
+package com.project.system_log_analyzer.config;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;

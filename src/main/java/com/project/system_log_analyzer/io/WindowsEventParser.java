@@ -1,8 +1,8 @@
-package com.project.authapi.system_log_analyzer.io;
+package com.project.system_log_analyzer.io;
 
 
-import com.project.authapi.system_log_analyzer.core.LogEvent;
-import com.project.authapi.system_log_analyzer.core.LogLevel;
+import com.project.system_log_analyzer.core.LogEvent;
+import com.project.system_log_analyzer.core.LogLevel;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;

@@ -10,7 +10,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/25"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.project.authapi.system_log_analyzer.controller.MainWindowFXController">
+            fx:controller="com.project.system_log_analyzer.controller.MainWindowFXController">
 
     <!-- top of scene -->
     <top>
