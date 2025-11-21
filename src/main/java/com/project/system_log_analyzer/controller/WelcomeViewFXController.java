@@ -1,7 +1,10 @@
 package com.project.system_log_analyzer.controller;
 
+import com.project.system_log_analyzer.SystemLogAnalyzerApp;
 import com.project.system_log_analyzer.config.ApplicationContextProvider;
 import com.project.system_log_analyzer.config.appConfig;
+import com.project.system_log_analyzer.system.WindowsElevationManager;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -34,6 +37,11 @@ public class WelcomeViewFXController {
     @FXML
     public void initialize() {
         System.out.println("Controller initialized, appConfig = " + appConfig);
+
+        if (appConfig.isCsvSecurity()) {
+            securityButton.setSelected(true);
+            securityLabel.setText("Admin permission granted!");
+        }
     }
 
 
@@ -57,7 +65,7 @@ public class WelcomeViewFXController {
         ApplicationContext springContext = ApplicationContextProvider.getApplicationContext();
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LoadingScreen.fxml"));
-        loader.setControllerFactory(springContext::getBean); // Spring Boot starter by JavaFX !!IMPORTANT!!
+        loader.setControllerFactory(springContext::getBean); // Spring starter by JavaFX !!IMPORTANT!!
         Parent root = loader.load();
 
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -103,17 +111,26 @@ public class WelcomeViewFXController {
 
     @FXML
     private void securityButtonON(ActionEvent event) throws IOException {
+
+        if (SystemLogAnalyzerApp.isElevated()) { // Admin ckeck for Security Logs
+            securityLabel.setText("Admin permission granted!");
+            appConfig.setCsvSecurity(securityButton.isSelected());
+            return;
+        }
+
         if (securityButton.isSelected()) {
             boolean proceed = askForSecurityPermission();
             if (!proceed) {
                 securityButton.setSelected(false);
-                securityLabel.setText("Admin permission required!");
                 appConfig.setCsvSecurity(false);
+                securityLabel.setText("Admin permission required!");
                 return;
-            } else {
-                securityLabel.setText("Admin permission granted!");
-                appConfig.setCsvSecurity(true);
             }
+
+            boolean relaunchStarted = WindowsElevationManager.relaunchAsAdmin("--elevated");
+
+            if (relaunchStarted) Platform.exit();
+
         } else {
             appConfig.setCsvSecurity(false);
             securityLabel.setText("(Requires Admin Permission)");

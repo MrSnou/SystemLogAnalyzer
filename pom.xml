@@ -18,7 +18,7 @@
 
     <dependencies>
 
-        <!-- CZYSTY SPRING (bez Boot) -->
+        <!-- Clear Spring -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
@@ -46,12 +46,19 @@
             <version>25-ea+1</version>
         </dependency>
 
+        <!-- JNA core + platform for elevating app to admin permissions -->
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.13.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
 
-            <!-- Kompilator Javy -->
+            <!-- Java compilator -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -71,7 +78,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Wyłącz testy przy build -->
+            <!-- mvn skip tests (because there is none . . . yet!)-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>

@@ -78,7 +78,7 @@ public class WindowsEventExporter {
         }
     }
 
-    public Path exportSecurityLogsAsAdmin() {  // Method responsible for exporting Security logs with admin permissions
+    public Path exportSecurityLogsAsAdmin() {
         try {
             String baseDir = config.getLogsDir() != null && !config.getLogsDir().isEmpty()
                     ? config.getLogsDir() : "logs/exported";
@@ -89,14 +89,29 @@ public class WindowsEventExporter {
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             Path outputFile = Path.of(dir.getAbsolutePath(), "Security_" + timestamp + ".csv");
 
-            String powershellCommand =
-                    "Start-Process powershell -Verb RunAs -ArgumentList " +
-                            "\"Get-WinEvent -LogName Security | " +
+            String ps =
+                    "Get-WinEvent -LogName Security -MaxEvents 15000 | " +
                             "Select-Object TimeCreated, Id, LevelDisplayName, ProviderName, Message | " +
-                            "Export-Csv -Path '" + outputFile.toAbsolutePath() + "' -NoTypeInformation -Encoding UTF8\"";
+                            "Export-Csv -Path '" + outputFile.toAbsolutePath() +
+                            "' -NoTypeInformation -Encoding UTF8";
 
-            ProcessBuilder pb = new ProcessBuilder("Powershell.exe", "-Command", powershellCommand);
+
+
+            List<String> cmd = new ArrayList<>();
+            cmd.add("powershell.exe");
+            cmd.add("-NoProfile");
+            cmd.add("-ExecutionPolicy");
+            cmd.add("Bypass");
+            cmd.add("-Command");
+            cmd.add(ps);
+
+            ProcessBuilder pb = new ProcessBuilder(cmd);
+            pb.redirectErrorStream(true);
             Process process = pb.start();
+
+            try (BufferedReader out = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                out.lines().forEach(System.out::println);
+            }
 
             int exit = process.waitFor();
 
@@ -113,6 +128,7 @@ public class WindowsEventExporter {
         }
         return null;
     }
+
 
     public List<Path> exportSelected() {
         List<Path> paths = new ArrayList<>();
