@@ -249,6 +249,9 @@ public class MainWindowFXController {
     private void applyFilters() {
         if (logs == null) return;
 
+        logTable.getSelectionModel().clearSelection();
+        logTable.getFocusModel().focus(-1);
+
         String input = searchField.getText().toLowerCase().trim();
 
         // input correctness check
