@@ -175,6 +175,9 @@ public class MainWindowFXController {
         refreshButton.setDisable(true);
         logTable.setDisable(true);
         loadingLabel.setText("Refreshing logs… Please wait. (Time of loading depends on number of logs)");
+        logTable.getSelectionModel().clearSelection();
+        logTable.getFocusModel().focus(-1);             // Details unexpected pop-up || Fixed
+        onClearFilters();                                  // Clear all filters
 
         Task<List<LogEvent>> task = new Task<List<LogEvent>>() {
             @Override
@@ -222,6 +225,8 @@ public class MainWindowFXController {
     }
     @FXML
     public void onSearchChanged() {
+        logTable.getSelectionModel().clearSelection();
+        logTable.getFocusModel().focus(-1);             // Details unexpected pop-up || Fixed
         applyFilters();
     }
 
@@ -243,6 +248,9 @@ public class MainWindowFXController {
     // Helper method for filters
     private void applyFilters() {
         if (logs == null) return;
+
+        logTable.getSelectionModel().clearSelection();
+        logTable.getFocusModel().focus(-1);
 
         String input = searchField.getText().toLowerCase().trim();
 

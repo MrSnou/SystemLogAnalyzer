@@ -21,7 +21,7 @@ public class WindowsEventExporter {
     public enum LogType {
         APPLICATION("Application"),
         SYSTEM("System"),
-        SECURITY("Security"); // TODO - Test in real environment (.exe/.jar)
+        SECURITY("Security");
 
         private final String logName;
         LogType(String logName) {
@@ -42,14 +42,18 @@ public class WindowsEventExporter {
 
     public Path exportToCsv(LogType type) { // Method responsible for exporting logs from windows
         try {
-            String baseDir = config.getLogsDir() != null && !config.getLogsDir().isEmpty()
-                    ? config.getLogsDir() : "logs/exported";
+            String baseDir;
+            if (config.getLogsDir() == null || config.getLogsDir().isBlank()) {
+                baseDir = System.getProperty("user.dir") + "/temp_";
+            } else {
+                baseDir = config.getLogsDir();
+            }
 
-            File dir = new File(baseDir, "exported");
-            if (!dir.exists()) dir.mkdirs();
+            File exportedDir = new File(baseDir, "exported");
+            if (!exportedDir.exists()) exportedDir.mkdirs();
 
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-            Path outputFile = Path.of(dir.getAbsolutePath(), type.getLogName() + "_" + timestamp + ".csv");
+            Path outputFile = Path.of(exportedDir.getAbsolutePath(), type.getLogName() + "_" + timestamp + ".csv");
 
             // Powershell command
             String command = String.format(
@@ -78,25 +82,44 @@ public class WindowsEventExporter {
         }
     }
 
-    public Path exportSecurityLogsAsAdmin() {  // Method responsible for exporting Security logs with admin permissions
+    public Path exportSecurityLogsAsAdmin() {
         try {
-            String baseDir = config.getLogsDir() != null && !config.getLogsDir().isEmpty()
-                    ? config.getLogsDir() : "logs/exported";
+            String baseDir;
+            if (config.getLogsDir() == null || config.getLogsDir().isBlank()) {
+                baseDir = System.getProperty("user.dir") + "/temp_";
+            } else {
+                baseDir = config.getLogsDir();
+            }
 
-            File dir = new File(baseDir, "exported");
-            if (!dir.exists()) dir.mkdirs();
+            File exportedDir = new File(baseDir, "exported");
+            if (!exportedDir.exists()) exportedDir.mkdirs();
 
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-            Path outputFile = Path.of(dir.getAbsolutePath(), "Security_" + timestamp + ".csv");
+            Path outputFile = Path.of(exportedDir.getAbsolutePath(), "Security_" + timestamp + ".csv");
 
-            String powershellCommand =
-                    "Start-Process powershell -Verb RunAs -ArgumentList " +
-                            "\"Get-WinEvent -LogName Security | " +
+            String ps =
+                    "Get-WinEvent -LogName Security -MaxEvents 15000 | " +
                             "Select-Object TimeCreated, Id, LevelDisplayName, ProviderName, Message | " +
-                            "Export-Csv -Path '" + outputFile.toAbsolutePath() + "' -NoTypeInformation -Encoding UTF8\"";
+                            "Export-Csv -Path '" + outputFile.toAbsolutePath() +
+                            "' -NoTypeInformation -Encoding UTF8";
 
-            ProcessBuilder pb = new ProcessBuilder("Powershell.exe", "-Command", powershellCommand);
+
+
+            List<String> cmd = new ArrayList<>();
+            cmd.add("powershell.exe");
+            cmd.add("-NoProfile");
+            cmd.add("-ExecutionPolicy");
+            cmd.add("Bypass");
+            cmd.add("-Command");
+            cmd.add(ps);
+
+            ProcessBuilder pb = new ProcessBuilder(cmd);
+            pb.redirectErrorStream(true);
             Process process = pb.start();
+
+            try (BufferedReader out = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                out.lines().forEach(System.out::println);
+            }
 
             int exit = process.waitFor();
 
@@ -113,6 +136,7 @@ public class WindowsEventExporter {
         }
         return null;
     }
+
 
     public List<Path> exportSelected() {
         List<Path> paths = new ArrayList<>();

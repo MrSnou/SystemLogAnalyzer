@@ -57,13 +57,23 @@ public class FileLoggerService implements LoggerService {
 
         if (logsDir == null) {
             String path = config.getLogsDir();
-            if (path == null) {
-                System.out.println("FileLoggerService: logsDir not set yet — skipping log.");
-                return; //
+
+            if (path == null || path.isBlank()) {
+
+                String baseDir = System.getProperty("user.dir");
+                path = baseDir + "/temp_";
+
+                new File(path).mkdirs();
+
+                config.setLogsDir(path);
+                config.setReportDir(path);
+
+                System.out.println("FileLoggerService: Using TEMP directory for logs: " + path);
             }
 
             logsDir = new File(path);
             if (!logsDir.exists()) logsDir.mkdirs();
+
             logFile = new File(logsDir, "log_" + nOfLogPart + ".log");
             createLogFileIfMissing();
         }

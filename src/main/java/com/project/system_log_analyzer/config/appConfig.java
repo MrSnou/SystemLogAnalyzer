@@ -9,6 +9,33 @@ public class appConfig {
     private boolean csvApplication;
     private boolean csvSystem;
     private boolean csvSecurity;
+    private boolean noLogs;
+    private boolean saveInExeDir;
+    private boolean relaunch;
+
+    public boolean isRelaunch() {
+        return relaunch;
+    }
+
+    public void setRelaunch(boolean relaunch) {
+        this.relaunch = relaunch;
+    }
+
+    public boolean isNoLogs() {
+        return noLogs;
+    }
+
+    public void setNoLogs(boolean noLogs) {
+        this.noLogs = noLogs;
+    }
+
+    public boolean isSaveInExeDir() {
+        return saveInExeDir;
+    }
+
+    public void setSaveInExeDir(boolean saveInExeDir) {
+        this.saveInExeDir = saveInExeDir;
+    }
 
     public boolean isCsvSecurity() {
         return csvSecurity;

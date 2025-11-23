@@ -1,7 +1,10 @@
 package com.project.system_log_analyzer.controller;
 
+import com.project.system_log_analyzer.SystemLogAnalyzerApp;
 import com.project.system_log_analyzer.config.ApplicationContextProvider;
 import com.project.system_log_analyzer.config.appConfig;
+import com.project.system_log_analyzer.system.WindowsElevationManager;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -28,12 +31,23 @@ public class WelcomeViewFXController {
     @FXML private CheckBox systemButton;
     @FXML private CheckBox securityButton;
     @FXML private Label securityLabel;
+    @FXML private Button logFilesDirButton;
+    @FXML private Button reportDirButton;
+
+    @FXML private CheckBox noLogsBox;
+    @FXML private CheckBox saveInAppDirectoryBox;
+
 
     @Autowired public appConfig appConfig;
 
     @FXML
     public void initialize() {
         System.out.println("Controller initialized, appConfig = " + appConfig);
+
+        if (appConfig.isCsvSecurity()) {
+            securityButton.setSelected(true);
+            securityLabel.setText("Admin permission granted!");
+        }
     }
 
 
@@ -42,9 +56,11 @@ public class WelcomeViewFXController {
         String logDir = logFilesDirField.getText();
         String reportDir = reportDirField.getText();
 
-        if (logDir.isEmpty() || reportDir.isEmpty()) {
-            informationLabel.setText("Please select both directories.");
-            return;
+        if (!noLogsBox.isSelected()) {
+            if (logDir.isEmpty() || reportDir.isEmpty()) {
+                informationLabel.setText("Please select both directories.");
+                return;
+            }
         }
 
         if (!appButton.isSelected() && !systemButton.isSelected() && !securityButton.isSelected()) {
@@ -57,7 +73,7 @@ public class WelcomeViewFXController {
         ApplicationContext springContext = ApplicationContextProvider.getApplicationContext();
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LoadingScreen.fxml"));
-        loader.setControllerFactory(springContext::getBean); // Spring Boot starter by JavaFX !!IMPORTANT!!
+        loader.setControllerFactory(springContext::getBean); // Spring starter by JavaFX !!IMPORTANT!!
         Parent root = loader.load();
 
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -103,19 +119,36 @@ public class WelcomeViewFXController {
 
     @FXML
     private void securityButtonON(ActionEvent event) throws IOException {
+
+        if (SystemLogAnalyzerApp.isElevated()) { // Admin ckeck for Security Logs
+            securityLabel.setText("Admin permission granted!");
+            appConfig.setCsvSecurity(securityButton.isSelected());
+            return;
+        }
+
         if (securityButton.isSelected()) {
             boolean proceed = askForSecurityPermission();
             if (!proceed) {
                 securityButton.setSelected(false);
-                securityLabel.setText("Admin permission required!");
                 appConfig.setCsvSecurity(false);
+                securityLabel.setText("Admin permission required!");
                 return;
-            } else {
-                securityLabel.setText("Admin permission granted!");
-                appConfig.setCsvSecurity(true);
             }
+
+            boolean relaunchStarted = WindowsElevationManager.relaunchAsAdmin("--elevated");
+
+            if (relaunchStarted) {
+                appConfig.setRelaunch(true);
+                Platform.exit();
+            } else {
+                appConfig.setCsvSecurity(false);
+                securityButton.setSelected(false);
+                securityLabel.setText("(Requires Admin Permission)");
+            }
+
         } else {
             appConfig.setCsvSecurity(false);
+            securityButton.setSelected(false);
             securityLabel.setText("(Requires Admin Permission)");
         }
     }
@@ -128,5 +161,77 @@ public class WelcomeViewFXController {
                 "Click OK to continue (you may see a UAC popup).");
 
         return alert.showAndWait().filter(btn -> btn == ButtonType.OK).isPresent();
+    }
+    @FXML
+    private void noLogsBoxOn(ActionEvent event) throws IOException {
+        if (noLogsBox.isSelected()) {
+            appConfig.setNoLogs(true);
+
+            appConfig.setSaveInExeDir(false);
+            saveInAppDirectoryBox.setSelected(false);
+            saveInAppDirectoryBox.setDisable(true);
+
+            logFilesDirButton.setDisable(true);
+            reportDirButton.setDisable(true);
+
+            logFilesDirField.clear();
+            reportDirField.clear();
+
+            appConfig.setLogsDir(null);
+            appConfig.setReportDir(null);
+
+        } else {
+            appConfig.setNoLogs(false);
+            saveInAppDirectoryBox.setDisable(false);
+
+            if (appConfig.isSaveInExeDir()) {
+                String baseDir = System.getProperty("user.dir");
+                String logs = baseDir + "/logs";
+                String reports = baseDir + "/reports";
+
+                appConfig.setSaveInExeDir(true);
+                appConfig.setLogsDir(logs);
+                appConfig.setReportDir(reports);
+
+                logFilesDirField.setText(logs);
+                reportDirField.setText(reports);
+
+                logFilesDirButton.setDisable(true);
+                reportDirButton.setDisable(true);
+
+            } else {
+                logFilesDirButton.setDisable(false);
+                reportDirButton.setDisable(false);
+            }
+        }
+    }
+    @FXML
+    private void saveInAppDirectoryBoxOn(ActionEvent event) throws IOException {
+        if (saveInAppDirectoryBox.isSelected()) {
+            appConfig.setSaveInExeDir(true);
+
+            String baseDir = System.getProperty("user.dir");
+            String logs = baseDir + "/logs";
+            String reports = baseDir + "/reports";
+
+            logFilesDirField.setText(logs);
+            reportDirField.setText(reports);
+
+            logFilesDirButton.setDisable(true);
+            reportDirButton.setDisable(true);
+
+            //new File(logs).mkdirs();
+            //new File(reports).mkdirs();
+
+            appConfig.setLogsDir(logs);
+            appConfig.setReportDir(reports);
+
+        } else {
+            appConfig.setSaveInExeDir(false);
+
+            logFilesDirButton.setDisable(false);
+            reportDirButton.setDisable(false);
+
+        }
     }
 }

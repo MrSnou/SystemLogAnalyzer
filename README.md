@@ -1,4 +1,4 @@
-#  System Log Analyzer (Work in progress — v0.1 MVP)
+#  System Log Analyzer (Work in progress — v0.2)
 
 **System Log Analyzer** A standalone Windows desktop application for IT professionals to export,
 parse and analyze Windows Event Logs with a fast, clean and modern UI.
