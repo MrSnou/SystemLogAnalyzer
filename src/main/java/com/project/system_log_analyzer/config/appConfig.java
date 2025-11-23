@@ -9,6 +9,24 @@ public class appConfig {
     private boolean csvApplication;
     private boolean csvSystem;
     private boolean csvSecurity;
+    private boolean noLogs;
+    private boolean saveInExeDir;
+
+    public boolean isNoLogs() {
+        return noLogs;
+    }
+
+    public void setNoLogs(boolean noLogs) {
+        this.noLogs = noLogs;
+    }
+
+    public boolean isSaveInExeDir() {
+        return saveInExeDir;
+    }
+
+    public void setSaveInExeDir(boolean saveInExeDir) {
+        this.saveInExeDir = saveInExeDir;
+    }
 
     public boolean isCsvSecurity() {
         return csvSecurity;

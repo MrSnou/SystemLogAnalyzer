@@ -38,6 +38,15 @@
             <Font size="18.0" />
          </font>
       </CheckBox>
+       <CheckBox fx:id="noLogsBox"
+                 layoutX="480" layoutY="300"
+                 text="Don't save logs/reports"
+                 onAction="#noLogsBoxOn"/>
+
+       <CheckBox fx:id="saveInAppDirectoryBox"
+                 layoutX="250" layoutY="300"
+                 text="Save logs/reports in app folder"
+                 onAction="#saveInAppDirectoryBoxOn"/>
       <CheckBox fx:id="systemButton" layoutX="359.0" layoutY="340.0" mnemonicParsing="false" onAction="#systemButtonON" prefHeight="45.0" prefWidth="150.0" text="System Logs" textAlignment="CENTER">
          <font>
             <Font size="18.0" />

@@ -31,6 +31,12 @@ public class WelcomeViewFXController {
     @FXML private CheckBox systemButton;
     @FXML private CheckBox securityButton;
     @FXML private Label securityLabel;
+    @FXML private Button logFilesDirButton;
+    @FXML private Button reportDirButton;
+
+    @FXML private CheckBox noLogsBox;
+    @FXML private CheckBox saveInAppDirectoryBox;
+
 
     @Autowired public appConfig appConfig;
 
@@ -50,9 +56,11 @@ public class WelcomeViewFXController {
         String logDir = logFilesDirField.getText();
         String reportDir = reportDirField.getText();
 
-        if (logDir.isEmpty() || reportDir.isEmpty()) {
-            informationLabel.setText("Please select both directories.");
-            return;
+        if (!noLogsBox.isSelected()) {
+            if (logDir.isEmpty() || reportDir.isEmpty()) {
+                informationLabel.setText("Please select both directories.");
+                return;
+            }
         }
 
         if (!appButton.isSelected() && !systemButton.isSelected() && !securityButton.isSelected()) {
@@ -145,5 +153,77 @@ public class WelcomeViewFXController {
                 "Click OK to continue (you may see a UAC popup).");
 
         return alert.showAndWait().filter(btn -> btn == ButtonType.OK).isPresent();
+    }
+    @FXML
+    private void noLogsBoxOn(ActionEvent event) throws IOException {
+        if (noLogsBox.isSelected()) {
+            appConfig.setNoLogs(true);
+
+            appConfig.setSaveInExeDir(false);
+            saveInAppDirectoryBox.setSelected(false);
+            saveInAppDirectoryBox.setDisable(true);
+
+            logFilesDirButton.setDisable(true);
+            reportDirButton.setDisable(true);
+
+            logFilesDirField.clear();
+            reportDirField.clear();
+
+            appConfig.setLogsDir(null);
+            appConfig.setReportDir(null);
+
+        } else {
+            appConfig.setNoLogs(false);
+            saveInAppDirectoryBox.setDisable(false);
+
+            if (appConfig.isSaveInExeDir()) {
+                String baseDir = System.getProperty("user.dir");
+                String logs = baseDir + "/logs";
+                String reports = baseDir + "/reports";
+
+                appConfig.setSaveInExeDir(true);
+                appConfig.setLogsDir(logs);
+                appConfig.setReportDir(reports);
+
+                logFilesDirField.setText(logs);
+                reportDirField.setText(reports);
+
+                logFilesDirButton.setDisable(true);
+                reportDirButton.setDisable(true);
+
+            } else {
+                logFilesDirButton.setDisable(false);
+                reportDirButton.setDisable(false);
+            }
+        }
+    }
+    @FXML
+    private void saveInAppDirectoryBoxOn(ActionEvent event) throws IOException {
+        if (saveInAppDirectoryBox.isSelected()) {
+            appConfig.setSaveInExeDir(true);
+
+            String baseDir = System.getProperty("user.dir");
+            String logs = baseDir + "/logs";
+            String reports = baseDir + "/reports";
+
+            logFilesDirField.setText(logs);
+            reportDirField.setText(reports);
+
+            logFilesDirButton.setDisable(true);
+            reportDirButton.setDisable(true);
+
+            new File(logs).mkdirs();
+            new File(reports).mkdirs();
+
+            appConfig.setLogsDir(logs);
+            appConfig.setReportDir(reports);
+
+        } else {
+            appConfig.setSaveInExeDir(false);
+
+            logFilesDirButton.setDisable(false);
+            reportDirButton.setDisable(false);
+
+        }
     }
 }
