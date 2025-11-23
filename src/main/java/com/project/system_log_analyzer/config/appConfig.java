@@ -11,6 +11,15 @@ public class appConfig {
     private boolean csvSecurity;
     private boolean noLogs;
     private boolean saveInExeDir;
+    private boolean relaunch;
+
+    public boolean isRelaunch() {
+        return relaunch;
+    }
+
+    public void setRelaunch(boolean relaunch) {
+        this.relaunch = relaunch;
+    }
 
     public boolean isNoLogs() {
         return noLogs;

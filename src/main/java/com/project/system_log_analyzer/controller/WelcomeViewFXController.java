@@ -137,10 +137,18 @@ public class WelcomeViewFXController {
 
             boolean relaunchStarted = WindowsElevationManager.relaunchAsAdmin("--elevated");
 
-            if (relaunchStarted) Platform.exit();
+            if (relaunchStarted) {
+                appConfig.setRelaunch(true);
+                Platform.exit();
+            } else {
+                appConfig.setCsvSecurity(false);
+                securityButton.setSelected(false);
+                securityLabel.setText("(Requires Admin Permission)");
+            }
 
         } else {
             appConfig.setCsvSecurity(false);
+            securityButton.setSelected(false);
             securityLabel.setText("(Requires Admin Permission)");
         }
     }
@@ -212,8 +220,8 @@ public class WelcomeViewFXController {
             logFilesDirButton.setDisable(true);
             reportDirButton.setDisable(true);
 
-            new File(logs).mkdirs();
-            new File(reports).mkdirs();
+            //new File(logs).mkdirs();
+            //new File(reports).mkdirs();
 
             appConfig.setLogsDir(logs);
             appConfig.setReportDir(reports);

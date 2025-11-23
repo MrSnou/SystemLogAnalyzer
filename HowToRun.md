@@ -4,7 +4,7 @@ The application is distributed as a **standalone EXE** built with `jpackage`.
 
 ### ✔ Requirements
 Nothing except:
-- Windows 10/11
+- Windows 10/11 (Currently on win 10 System Logs are not working - TODO)
 - Local user profile
 - Windows PowerShell (built-in on Windows 10/11)
 

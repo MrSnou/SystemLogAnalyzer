@@ -21,7 +21,7 @@ public class WindowsEventExporter {
     public enum LogType {
         APPLICATION("Application"),
         SYSTEM("System"),
-        SECURITY("Security"); // TODO - Test in real environment (.exe/.jar)
+        SECURITY("Security");
 
         private final String logName;
         LogType(String logName) {
@@ -53,7 +53,7 @@ public class WindowsEventExporter {
             if (!exportedDir.exists()) exportedDir.mkdirs();
 
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-            Path outputFile = Path.of(exportedDir.getAbsolutePath(), "Security_" + timestamp + ".csv");
+            Path outputFile = Path.of(exportedDir.getAbsolutePath(), type.getLogName() + "_" + timestamp + ".csv");
 
             // Powershell command
             String command = String.format(

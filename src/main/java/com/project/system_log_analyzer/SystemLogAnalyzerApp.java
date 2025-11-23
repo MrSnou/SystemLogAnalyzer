@@ -1,7 +1,6 @@
 package com.project.system_log_analyzer;
 
 import com.project.system_log_analyzer.config.SpringConfig;
-import com.project.system_log_analyzer.system.WindowsElevationManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,6 +14,8 @@ import java.io.PrintStream;
 
 public class SystemLogAnalyzerApp extends Application {
 
+    private boolean app_Log = false;
+
     private AnnotationConfigApplicationContext springContext;
 
     private static Boolean elevatedFlag = false; // Admin permissions
@@ -23,15 +24,19 @@ public class SystemLogAnalyzerApp extends Application {
     public void init() {
         springContext = new AnnotationConfigApplicationContext(SpringConfig.class);
 
-        // debug
-        PrintStream out = null;
-        try {
-            out = new PrintStream(new FileOutputStream("app.log", true), true);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+        if (app_Log) { // debug app.log in main directory
+            PrintStream out = null;
+            try {
+                out = new PrintStream(new FileOutputStream("app.log", true), true);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            System.setOut(out);
+            System.setErr(out);
         }
-        System.setOut(out);
-        System.setErr(out);
+
+
+
     }
 
     @Override
